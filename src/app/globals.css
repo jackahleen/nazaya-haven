@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-cream: #faf7f2;
+  --color-cream-dark: #f3ede4;
+  --color-lavender: #e8dff5;
+  --color-lavender-light: #f4effa;
+  --color-lavender-deep: #d4c4eb;
+  --color-purple: #7c5cbf;
+  --color-purple-deep: #5b3f96;
+  --color-purple-soft: #9b7fd4;
+  --color-ink: #3d2f5c;
+  --color-ink-muted: #6b5f82;
+  --font-sans: var(--font-geist-sans);
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  min-height: 100vh;
+}
