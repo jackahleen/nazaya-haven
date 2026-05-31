@@ -11,6 +11,12 @@
   --color-purple-soft: #9b7fd4;
   --color-ink: #3d2f5c;
   --color-ink-muted: #6b5f82;
+  --color-pastel-mint: #dff5ef;
+  --color-pastel-sky: #e3eef9;
+  --color-pastel-peach: #fdeee6;
+  --color-pastel-butter: #faf3dc;
+  --color-pastel-rose: #fae8f0;
+  --color-pastel-lilac: #efe6fa;
   --font-sans: var(--font-geist-sans);
 }
 
