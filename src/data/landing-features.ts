@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentType } from "react";
 import {
   IconAI,
   IconBriefcase,
@@ -23,7 +23,7 @@ export type FeatureAccent =
 export type LandingFeature = {
   title: string;
   description: string;
-  icon: ReactNode;
+  Icon: ComponentType;
   accent: FeatureAccent;
   href: string;
   featured?: boolean;
@@ -34,7 +34,7 @@ export const landingFeatures: LandingFeature[] = [
     title: "Community Feed",
     description:
       "Stories, updates, and encouragement from families and advocates in your circle.",
-    icon: <IconFeed />,
+    Icon: IconFeed,
     accent: "lavender",
     href: "/dashboard",
   },
@@ -42,7 +42,7 @@ export const landingFeatures: LandingFeature[] = [
     title: "Support Groups",
     description:
       "Moderated groups for parenting, education, wellness, and more — matched to your needs.",
-    icon: <IconGroups />,
+    Icon: IconGroups,
     accent: "sky",
     href: "/dashboard",
   },
@@ -50,7 +50,7 @@ export const landingFeatures: LandingFeature[] = [
     title: "Jobs & Training",
     description:
       "Career pathways, skill-building workshops, and job listings tailored for caregivers.",
-    icon: <IconBriefcase />,
+    Icon: IconBriefcase,
     accent: "mint",
     href: "/dashboard",
   },
@@ -58,7 +58,7 @@ export const landingFeatures: LandingFeature[] = [
     title: "Legal Navigation",
     description:
       "Plain-language guides and referrals for rights, custody, education law, and advocacy.",
-    icon: <IconLegal />,
+    Icon: IconLegal,
     accent: "peach",
     href: "/dashboard",
   },
@@ -66,7 +66,7 @@ export const landingFeatures: LandingFeature[] = [
     title: "Resources Near You",
     description:
       "Local clinics, legal aid, food banks, and community programs on an interactive map.",
-    icon: <IconMap />,
+    Icon: IconMap,
     accent: "butter",
     href: "/dashboard",
   },
@@ -74,7 +74,7 @@ export const landingFeatures: LandingFeature[] = [
     title: "Journal",
     description:
       "A private, calm space for reflections, milestones, and notes on your family’s journey.",
-    icon: <IconJournal />,
+    Icon: IconJournal,
     accent: "rose",
     href: "/dashboard",
   },
@@ -82,7 +82,7 @@ export const landingFeatures: LandingFeature[] = [
     title: "Teacher Mode",
     description:
       "Classroom-friendly tools and resources for educators supporting students and families.",
-    icon: <IconTeacher />,
+    Icon: IconTeacher,
     accent: "lilac",
     href: "/dashboard",
   },
@@ -90,7 +90,7 @@ export const landingFeatures: LandingFeature[] = [
     title: "Nazaya AI Assistant",
     description:
       "Gentle, guided answers about advocacy, next steps, and support — always with care.",
-    icon: <IconAI />,
+    Icon: IconAI,
     accent: "purple",
     href: "/dashboard",
     featured: true,

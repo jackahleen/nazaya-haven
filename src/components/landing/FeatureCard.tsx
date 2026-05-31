@@ -53,6 +53,7 @@ type FeatureCardProps = {
 
 export function FeatureCard({ feature }: FeatureCardProps) {
   const styles = accentStyles[feature.accent];
+  const Icon = feature.Icon;
 
   return (
     <Link
@@ -62,7 +63,7 @@ export function FeatureCard({ feature }: FeatureCardProps) {
       <div
         className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl transition group-hover:scale-105 ${styles.icon}`}
       >
-        {feature.icon}
+        <Icon />
       </div>
       <h3 className="text-lg font-semibold text-ink">{feature.title}</h3>
       <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-muted">
