@@ -17,7 +17,7 @@
   --color-pastel-butter: #faf3dc;
   --color-pastel-rose: #fae8f0;
   --color-pastel-lilac: #efe6fa;
-  --font-sans: var(--font-geist-sans);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body {
