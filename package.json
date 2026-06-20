@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "serve:static": "serve out -l 3000",
+    "serve:static": "serve out -l tcp://127.0.0.1:3000",
     "test:e2e": "playwright test"
   },
   "dependencies": {
