@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Nazaya Haven</title>
+  <desc id="desc">A soft purple Nazaya Haven app icon with the letters NH.</desc>
+  <rect width="512" height="512" rx="104" fill="#faf7f2"/>
+  <circle cx="256" cy="256" r="188" fill="#e8dff5"/>
+  <circle cx="256" cy="256" r="142" fill="#7c5cbf"/>
+  <path d="M151 332V180h37l72 91v-91h41v152h-35l-74-94v94h-41Zm192 0V180h42v58h55v-58h42v152h-42v-58h-55v58h-42Z" fill="#faf7f2"/>
+</svg>
