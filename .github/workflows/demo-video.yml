@@ -1,0 +1,68 @@
+name: Demo Video
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Nazaya Haven URL to record. Leave blank to infer the GitHub Pages URL."
+        required: false
+        type: string
+      run_mode:
+        description: "brief prepares artifacts only; simular runs the guarded Simular/Agent-S script."
+        required: true
+        default: brief
+        type: choice
+        options:
+          - brief
+          - simular
+
+permissions:
+  contents: read
+
+jobs:
+  demo-video:
+    name: Prepare or run demo capture
+    runs-on: ubuntu-latest
+
+    env:
+      DEMO_TARGET_URL: ${{ inputs.target_url }}
+      AGENT_S_ENABLE_RUN: ${{ inputs.run_mode == 'simular' && vars.AGENT_S_ENABLE_RUN || 'false' }}
+      AGENT_S_PROVIDER: ${{ vars.AGENT_S_PROVIDER }}
+      AGENT_S_MODEL: ${{ vars.AGENT_S_MODEL }}
+      AGENT_S_GROUND_PROVIDER: ${{ vars.AGENT_S_GROUND_PROVIDER }}
+      AGENT_S_GROUND_URL: ${{ secrets.AGENT_S_GROUND_URL }}
+      AGENT_S_GROUND_MODEL: ${{ vars.AGENT_S_GROUND_MODEL }}
+      AGENT_S_GROUNDING_WIDTH: ${{ vars.AGENT_S_GROUNDING_WIDTH }}
+      AGENT_S_GROUNDING_HEIGHT: ${{ vars.AGENT_S_GROUNDING_HEIGHT }}
+      AGENT_S_TIMEOUT_SECONDS: ${{ vars.AGENT_S_TIMEOUT_SECONDS }}
+      AGENT_S_TASK: ${{ vars.AGENT_S_TASK }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      SIMULAR_DEMO_COMMAND: ${{ secrets.SIMULAR_DEMO_COMMAND }}
+      SIMULAR_DEMO_VIDEO_PATH: ${{ vars.SIMULAR_DEMO_VIDEO_PATH }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        if: ${{ inputs.run_mode == 'simular' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Copy static demo brief
+        run: |
+          mkdir -p artifacts/demo
+          cp tools/demo/agent-s-demo-brief.md artifacts/demo/
+
+      - name: Run guarded Simular or Agent-S demo capture
+        run: tools/demo/run-agent-s-demo.sh
+
+      - name: Upload demo artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nazaya-haven-demo-video-artifacts
+          path: artifacts/demo
+          if-no-files-found: error
