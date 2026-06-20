@@ -1,0 +1,125 @@
+{
+  "project": "Nazaya Haven",
+  "event": "Hack Berkeley AI 2026",
+  "track": "Ddoski's World",
+  "nativeHarnessStatus": "not-callable-in-current-codex-session",
+  "principle": "A sponsor tool counts as a direct consumer if it is used by project runtime, CI, testing, demo production, or repo workflow before any PLAI adapter is queued.",
+  "candidateFeatures": [
+    {
+      "id": "resource-routing",
+      "label": "Caregiver resource routing",
+      "description": "Help a foster family describe a need and receive next-step resource categories, questions, and handoff suggestions.",
+      "candidateTools": ["Fetch.ai", "Orkes"],
+      "staticPagesMode": "mocked scripted flow",
+      "liveServiceMode": "external agent or workflow endpoint"
+    },
+    {
+      "id": "voice-intake",
+      "label": "Voice-guided intake",
+      "description": "Let a caregiver speak a need and receive guided follow-up prompts or summaries.",
+      "candidateTools": ["Deepgram"],
+      "staticPagesMode": "visible entry point with typed fallback",
+      "liveServiceMode": "hosted voice worker with secure token handling"
+    },
+    {
+      "id": "deployed-ui-smoke-tests",
+      "label": "Deployed UI smoke tests",
+      "description": "Open the public UI preview and verify the landing, login, and dashboard routes work.",
+      "candidateTools": ["Browserbase", "Playwright"],
+      "staticPagesMode": "GitHub Pages target",
+      "liveServiceMode": "Browserbase managed browser session"
+    },
+    {
+      "id": "frontend-observability",
+      "label": "Frontend observability",
+      "description": "Capture client errors and release evidence from the static UI preview.",
+      "candidateTools": ["Sentry"],
+      "staticPagesMode": "browser SDK gated by public DSN",
+      "liveServiceMode": "Sentry project with GitHub Actions release metadata"
+    },
+    {
+      "id": "demo-production",
+      "label": "Demo production",
+      "description": "Automate walkthrough capture for the UI and assistant story.",
+      "candidateTools": ["Simular", "Agent-S"],
+      "staticPagesMode": "drive GitHub Pages UI",
+      "liveServiceMode": "manual demo-video workflow with Simular Cloud, sponsor command, or Agent-S CLI"
+    },
+    {
+      "id": "repo-engineering",
+      "label": "Repo engineering support",
+      "description": "Use an agentic engineering assistant for scoped code tasks with visible repo artifacts.",
+      "candidateTools": ["Cognition"],
+      "staticPagesMode": "not user-facing",
+      "liveServiceMode": "repo tasks, patches, and review notes"
+    },
+    {
+      "id": "cache-or-retrieval",
+      "label": "Cache or retrieval memory",
+      "description": "Cache resource metadata or support vector retrieval when an external service layer exists.",
+      "candidateTools": ["Redis"],
+      "staticPagesMode": "not used",
+      "liveServiceMode": "external service cache or retrieval store"
+    }
+  ],
+  "directConsumptionScaffolds": [
+    {
+      "tool": "Playwright",
+      "surface": "tests/e2e/routes.spec.ts",
+      "status": "implemented"
+    },
+    {
+      "tool": "Simular or Agent-S",
+      "surface": ".github/workflows/demo-video.yml",
+      "status": "manual-guarded-scaffold"
+    },
+    {
+      "tool": "Browserbase",
+      "surface": "future browserbase smoke workflow",
+      "status": "queued"
+    },
+    {
+      "tool": "Sentry",
+      "surface": "future frontend observability workflow",
+      "status": "queued"
+    }
+  ],
+  "plaiAdapterQueue": [
+    {
+      "tool": "Browserbase",
+      "adapter": "test-run-event-adapter",
+      "queued": true
+    },
+    {
+      "tool": "Sentry",
+      "adapter": "observability-event-adapter",
+      "queued": true
+    },
+    {
+      "tool": "Simular",
+      "adapter": "demo-run-adapter",
+      "queued": true
+    },
+    {
+      "tool": "Fetch.ai",
+      "adapter": "agent-orchestration-adapter",
+      "queued": true
+    },
+    {
+      "tool": "Deepgram",
+      "adapter": "voice-session-adapter",
+      "queued": true
+    },
+    {
+      "tool": "Orkes",
+      "adapter": "workflow-state-adapter",
+      "queued": true
+    },
+    {
+      "tool": "Redis",
+      "adapter": "none",
+      "queued": false,
+      "reason": "PLAI substrate integration uses NATS/JetStream rather than Redis."
+    }
+  ]
+}
