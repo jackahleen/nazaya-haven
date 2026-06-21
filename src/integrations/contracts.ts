@@ -7,7 +7,8 @@ export type IntegrationProviderId =
   | "fetch-ai"
   | "orkes"
   | "cognition"
-  | "redis";
+  | "redis"
+  | "contextual-ai";
 
 export type IntegrationCategory =
   | "language-model"
@@ -18,7 +19,8 @@ export type IntegrationCategory =
   | "agent-orchestration"
   | "workflow-orchestration"
   | "engineering-agent"
-  | "data-store";
+  | "data-store"
+  | "retrieval-ranking";
 
 export type IntegrationReadiness =
   | "direct-preview"

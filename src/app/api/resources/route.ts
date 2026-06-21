@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cacheKey } from "@/lib/cache/cache-keys";
 import { writeJsonCache } from "@/lib/cache/json-cache";
 import { getCachedResources } from "@/lib/resources/free-source-cache";
+import { rerankResources } from "@/integrations/contextual-ai/client";
 import type { CommunityResourceCategory, CommunityResourceResults } from "@/data/community-resources";
 
 const VALID_CATEGORIES = [
@@ -182,14 +183,41 @@ If a field is unknown, use an empty string. Only include real organizations foun
       }
     }
 
-    // Cache the merged results
+    // Optionally re-rank resources by relevance to the caregiver's need.
+    // If CONTEXTUAL_API_KEY is not set, this is a no-op (identity pass-through).
+    if (typeof merged === "object" && merged !== null) {
+      const needDescription = selected
+        .map((cat: string) => CATEGORY_LABELS[cat as Category])
+        .join(", ");
+
+      // Re-rank each category array
+      for (const category of Object.keys(merged)) {
+        if (category === "national" || !Array.isArray(merged[category])) {
+          continue;
+        }
+        const resources = merged[category];
+        if (resources.length > 0) {
+          merged[category] = await rerankResources(resources, needDescription);
+        }
+      }
+
+      // Re-rank national resources with a generic query
+      if (Array.isArray(merged.national) && merged.national.length > 0) {
+        merged.national = await rerankResources(
+          merged.national,
+          "family support and parenting resources",
+        );
+      }
+    }
+
+    // Cache the merged and re-ranked results
     const cacheCategories = [...selected].sort();
     const key = cacheKey("resource-search", { zip, selected: cacheCategories });
     await writeJsonCache(key, merged, 60 * 60 * 24);
 
     return NextResponse.json(merged, {
       headers: {
-        "x-nazaya-source": "mixed",
+        "x-nazaya-source": "mixed-reranked",
         "x-nazaya-cache": "miss",
       },
     });
