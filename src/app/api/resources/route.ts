@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cacheKey } from "@/lib/cache/cache-keys";
-import { writeJsonCache } from "@/lib/cache/json-cache";
+import { readJsonCache, writeJsonCache } from "@/lib/cache/json-cache";
 import { getCachedResources } from "@/lib/resources/free-source-cache";
 import { rerankResources } from "@/integrations/contextual-ai/client";
+import {
+  getOrCreateSessionContext,
+  updateSessionContext,
+} from "@/lib/memory/agent-memory";
+import { recordResourceSearch } from "@/lib/memory/cross-context";
+import {
+  getSessionIdFromRequest,
+  getUserIdFromRequest,
+} from "@/lib/memory/session-utils";
 import type { CommunityResourceCategory, CommunityResourceResults, CommunityResource } from "@/data/community-resources";
 
 const VALID_CATEGORIES = [
@@ -40,7 +49,14 @@ function hasResults(results: CommunityResourceResults, category: CommunityResour
 }
 
 export async function POST(req: NextRequest) {
-  const { zip, categories } = await req.json();
+  const { zip, categories, sessionId: clientSessionId } = await req.json();
+
+  // Derive session ID
+  const sessionId = clientSessionId || (await getSessionIdFromRequest(req)) || "session-unknown";
+  const userId = getUserIdFromRequest(req) || undefined;
+
+  // Load or create session context
+  const sessionContext = await getOrCreateSessionContext(sessionId, userId);
 
   if (!zip || typeof zip !== "string" || !/^\d{5}$/.test(zip)) {
     return NextResponse.json(
@@ -67,6 +83,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Update session context with search info
+  await updateSessionContext(sessionId, {
+    currentLane: "resources",
+    entities: {
+      ...sessionContext.entities,
+      zip_code: zip,
+      concern_tags: selected.join(","),
+    },
+  });
+
   // CACHE-FIRST: Try Redis then free sources
   const freeResults = await getCachedResources({
     zip,
@@ -76,8 +102,24 @@ export async function POST(req: NextRequest) {
   // Check which categories have NO local results (gaps to fill with Claude)
   const gapsNeedingClaude = selected.filter((cat) => !hasResults(freeResults, cat));
 
-  // If all categories are satisfied by free sources, return immediately
+  // If all categories are satisfied by free sources, record and return immediately
   if (gapsNeedingClaude.length === 0) {
+    // Record resource views in memory (for cross-context)
+    const freeResultsData = freeResults as Record<string, unknown>;
+    for (const category of selected) {
+      const resources = freeResultsData[category];
+      if (Array.isArray(resources)) {
+        for (const res of resources.slice(0, 3)) {
+          const resource = res as Record<string, unknown>;
+          await recordResourceSearch(
+            sessionId,
+            String(resource.name || "unknown"),
+            String(resource.name || "unknown"),
+            category
+          );
+        }
+      }
+    }
     return NextResponse.json(freeResults, {
       headers: {
         "x-nazaya-source": "cache",
@@ -224,6 +266,24 @@ If a field is unknown, use an empty string. Only include real organizations foun
           "family support and parenting resources",
         );
         merged.national = reranked.map(toCommunityResource);
+      }
+    }
+
+    // Record resource views in memory (for cross-context)
+    const mergedData = merged as Record<string, unknown>;
+    for (const category of Object.keys(mergedData)) {
+      if (category === "national") continue;
+      const resources = mergedData[category];
+      if (Array.isArray(resources)) {
+        for (const res of resources.slice(0, 3)) {
+          const resource = res as Record<string, unknown>;
+          await recordResourceSearch(
+            sessionId,
+            String(resource.name || "unknown"),
+            String(resource.name || "unknown"),
+            category
+          );
+        }
       }
     }
 
