@@ -47,3 +47,17 @@ test("dashboard exposes the core support areas", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Sentry" })).toBeVisible();
   await expect(page.getByText("PLAI adapter queued").first()).toBeVisible();
 });
+
+test("resources page returns static preview results without an API server", async ({
+  page,
+}) => {
+  await page.goto("/resources/");
+
+  await page.getByRole("button", { name: "Housing" }).click();
+  await page.getByLabel("Zip code").fill("94102");
+  await page.getByRole("button", { name: "Search" }).click();
+
+  await expect(page.getByRole("heading", { name: "Housing" })).toBeVisible();
+  await expect(page.getByText("Compass Family Services")).toBeVisible();
+  await expect(page.getByText("Static preview result: using")).toBeVisible();
+});

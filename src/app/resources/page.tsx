@@ -1,21 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import {
+  type CommunityResource,
+  type CommunityResourceCategory,
+  type CommunityResourceResults,
+  findStaticCommunityResources,
+} from "@/data/community-resources";
 import { PageShell } from "@/components/PageShell";
 
-type Resource = {
-  name: string;
-  description: string;
-  phone: string;
-  website: string;
-  address?: string;
-};
-
-type ResourceResults = {
-  [key: string]: Resource[];
-};
-
-const CATEGORIES = [
+const CATEGORIES: { id: CommunityResourceCategory; label: string }[] = [
   { id: "housing", label: "Housing" },
   { id: "food", label: "Food Insecurity" },
   { id: "family", label: "Family Care" },
@@ -23,7 +17,7 @@ const CATEGORIES = [
   { id: "community", label: "Community Support" },
 ] as const;
 
-const CATEGORY_LABELS: Record<string, string> = {
+const CATEGORY_LABELS: Record<CommunityResourceCategory | "national", string> = {
   housing: "Housing",
   food: "Food Insecurity",
   family: "Family Care",
@@ -34,20 +28,29 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function ResourcesPage() {
   const [zip, setZip] = useState("");
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<CommunityResourceCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [results, setResults] = useState<ResourceResults | null>(null);
+  const [fallbackNotice, setFallbackNotice] = useState("");
+  const [results, setResults] = useState<CommunityResourceResults | null>(null);
 
-  function toggleCategory(id: string) {
+  function toggleCategory(id: CommunityResourceCategory) {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
     );
   }
 
+  function showStaticPreviewResults() {
+    setFallbackNotice(
+      "Static preview result: using built-in Bay Area sample resources while live search is unavailable."
+    );
+    setResults(findStaticCommunityResources({ zip, categories: selected }));
+  }
+
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setFallbackNotice("");
     setResults(null);
 
     if (selected.length === 0) {
@@ -69,12 +72,12 @@ export default function ResourcesPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Something went wrong.");
+        showStaticPreviewResults();
         return;
       }
-      setResults(data);
+      setResults(data as CommunityResourceResults);
     } catch {
-      setError("Could not reach the server. Please try again.");
+      showStaticPreviewResults();
     } finally {
       setLoading(false);
     }
@@ -143,14 +146,19 @@ export default function ResourcesPage() {
       </form>
 
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {fallbackNotice && (
+        <p className="mt-4 max-w-2xl rounded-2xl bg-pastel-butter/70 px-4 py-3 text-sm text-ink-muted">
+          {fallbackNotice}
+        </p>
+      )}
 
       {results && (
         <div className="mt-10 space-y-10">
           {Object.entries(results).map(([key, items]) =>
-            items.length > 0 ? (
+            items && items.length > 0 ? (
               <section key={key}>
                 <h2 className="text-xl font-semibold text-ink">
-                  {CATEGORY_LABELS[key] ?? key}
+                  {CATEGORY_LABELS[key as keyof typeof CATEGORY_LABELS] ?? key}
                 </h2>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   {items.map((r, i) => (
@@ -166,7 +174,7 @@ export default function ResourcesPage() {
   );
 }
 
-function ResourceCard({ resource }: { resource: Resource }) {
+function ResourceCard({ resource }: { resource: CommunityResource }) {
   return (
     <article className="rounded-2xl border border-lavender-deep/40 bg-cream-dark/80 p-5">
       <h3 className="font-semibold text-ink">{resource.name}</h3>
