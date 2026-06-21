@@ -42,3 +42,25 @@ Then open http://127.0.0.1:3000.
 # Full dev runtime:
 ./tools/demo/run-local-windows.ps1 -Mode dev
 ```
+
+
+
+## Recording a walkthrough video (live runtime)
+
+For the Simular/Sai demo-video lane. Records the live dev runtime (real /api/* —
+the AI chat response is real, not the static fallback) into a .webm using the
+Playwright browser already in devDependencies. GitHub PR/issue comments accept
+.webm uploads directly.
+
+```powershell
+# 1. start the live runtime
+npm run dev
+# 2. (first time only) install the Playwright browser
+npx playwright install chromium
+# 3. record -> writes a .webm into the folder given by VIDEO_DIR
+$env:VIDEO_DIR = "$PWD\_video"; node tools/demo/record-walkthrough.mjs
+```
+
+The script walks: landing -> Get Started -> demo login -> dashboard -> live
+Nazaya AI chat -> resource search -> legal. Edit `tools/demo/record-walkthrough.mjs`
+to adjust the route/interaction sequence. Output is `_video/*.webm` (gitignored).
