@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cacheKey } from "@/lib/cache/cache-keys";
-import { readJsonCache, writeJsonCache } from "@/lib/cache/json-cache";
+import { writeJsonCache } from "@/lib/cache/json-cache";
 import { getCachedResources } from "@/lib/resources/free-source-cache";
 import { rerankResources } from "@/integrations/contextual-ai/client";
 import {

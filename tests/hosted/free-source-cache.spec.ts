@@ -8,7 +8,7 @@ import { expect, test } from "@playwright/test";
 test("curated free source returns results for housing without any API", async ({
   request,
 }) => {
-  const response = await request.post("/api/resources", {
+  const response = await request.post("/api/resources/", {
     data: {
       zip: "94103",
       categories: ["housing"],
@@ -34,7 +34,7 @@ test("curated free source returns results for housing without any API", async ({
 });
 
 test("multiple categories work together from free sources", async ({ request }) => {
-  const response = await request.post("/api/resources", {
+  const response = await request.post("/api/resources/", {
     data: {
       zip: "94107",
       categories: ["housing", "food", "health"],
@@ -58,7 +58,7 @@ test("multiple categories work together from free sources", async ({ request }) 
 });
 
 test("invalid zip code is rejected", async ({ request }) => {
-  const response = await request.post("/api/resources", {
+  const response = await request.post("/api/resources/", {
     data: {
       zip: "12",
       categories: ["housing"],
@@ -71,7 +71,7 @@ test("invalid zip code is rejected", async ({ request }) => {
 });
 
 test("empty categories array is rejected", async ({ request }) => {
-  const response = await request.post("/api/resources", {
+  const response = await request.post("/api/resources/", {
     data: {
       zip: "94103",
       categories: [],
@@ -84,7 +84,7 @@ test("empty categories array is rejected", async ({ request }) => {
 });
 
 test("response includes national resources", async ({ request }) => {
-  const response = await request.post("/api/resources", {
+  const response = await request.post("/api/resources/", {
     data: {
       zip: "94103",
       categories: ["community"],
@@ -102,7 +102,7 @@ test("all categories are valid", async ({ request }) => {
   const allCategories = ["housing", "food", "family", "health", "community"];
 
   for (const category of allCategories) {
-    const response = await request.post("/api/resources", {
+    const response = await request.post("/api/resources/", {
       data: {
         zip: "94103",
         categories: [category],

@@ -5,6 +5,7 @@ import { AuthenticatedUserSummary } from "@/components/dashboard/AuthenticatedUs
 import { DigitalParentingGuide } from "@/components/digital-parenting/DigitalParentingGuide";
 import { DashboardCard } from "@/components/DashboardCard";
 import { IntegrationReadiness } from "@/components/integrations/IntegrationReadiness";
+import { SessionMemoryPanel } from "@/components/memory/SessionMemoryPanel";
 import {
   IconAI,
   IconFeed,
@@ -115,6 +116,7 @@ export default function DashboardPage() {
       <DigitalParentingGuide />
       <ChildCornerPreview />
       <IntegrationReadiness />
+      <SessionMemoryPanel demoMode={true} />
 
       <p className="mt-10 text-center text-sm text-ink-muted">
         <Link href="/" className="font-medium text-purple hover:text-purple-deep">

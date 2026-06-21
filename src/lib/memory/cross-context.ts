@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { getRedisClient } from "@/lib/redis/client";
 
 /**
@@ -247,7 +246,7 @@ export async function buildCrossContext(sessionId: string): Promise<string> {
         const content = (lastMessage.message as Record<string, string>).content || "";
         parts.push(`Recent user message: "${content.slice(0, 200)}"`);
       }
-    } catch (e) {
+    } catch {
       // Stream may not exist
     }
 
@@ -271,7 +270,7 @@ export async function buildCrossContext(sessionId: string): Promise<string> {
           parts.push(`User has searched for: ${Array.from(categories).join(", ")}`);
         }
       }
-    } catch (e) {
+    } catch {
       // Stream may not exist
     }
 
@@ -293,7 +292,7 @@ export async function buildCrossContext(sessionId: string): Promise<string> {
           parts.push(`Voice input: "${transcript.slice(0, 100)}..."`);
         }
       }
-    } catch (e) {
+    } catch {
       // Stream may not exist
     }
 
@@ -317,7 +316,7 @@ export async function buildCrossContext(sessionId: string): Promise<string> {
             .join(", ")}`
         );
       }
-    } catch (e) {
+    } catch {
       // Stream may not exist
     }
 
@@ -350,7 +349,7 @@ export async function clearSessionEventLogs(sessionId: string): Promise<void> {
     for (const key of keys) {
       try {
         await client.del(key);
-      } catch (e) {
+      } catch {
         // Key may not exist
       }
     }

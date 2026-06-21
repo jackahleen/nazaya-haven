@@ -221,7 +221,7 @@ export async function semanticSearchMemory(
               score: 0, // No score in fallback
             });
           }
-        } catch (e) {
+        } catch {
           // Skip if can't read
         }
       }
@@ -298,7 +298,7 @@ export async function getMemoryTurns(
             metadata: data.metadata,
           });
         }
-      } catch (e) {
+      } catch {
         // Skip if can't read
       }
     }
