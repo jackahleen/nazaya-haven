@@ -49,6 +49,227 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+## Run Redis locally (Redis Stack)
+
+Nazaya Haven uses Redis for caching, agent traces, and vector memory. To test the full memory and cache features locally, run Redis Stack (includes RedisJSON, RediSearch, and Redis Insight):
+
+### Start Redis Stack
+
+```bash
+# Start Redis with docker-compose (requires Docker)
+docker compose up -d redis
+
+# Or use the Makefile shortcut
+make redis-up
+```
+
+This starts:
+- **Redis server** on `localhost:6379`
+- **Redis Insight UI** on `http://localhost:8001` (optional, for debugging)
+- Named volume for data persistence
+
+### Set up local environment
+
+Create or update `.env.local`:
+
+```bash
+REDIS_URL=redis://:local-dev@localhost:6379
+```
+
+### Run dev server with local Redis
+
+```bash
+# Option 1: Manual setup
+REDIS_URL=redis://:local-dev@localhost:6379 npm run dev
+
+# Option 2: Makefile shortcut
+make dev-redis
+```
+
+### Verify cache hits
+
+Prove the cache is working locally:
+
+```bash
+# Start Redis, build, and run the server with dual-curl test
+make cache-demo
+```
+
+This will:
+1. Start Redis Stack
+2. Build the hosted runtime
+3. Start the server
+4. Make two POST requests to `/api/resources/`
+5. Show cache headers (`x-nazaya-cache: miss` then `x-nazaya-cache: hit`)
+
+### Access Redis CLI
+
+```bash
+# Option 1: Direct docker exec
+docker exec -it nazaya-redis redis-cli -a local-dev
+
+# Option 2: Makefile shortcut
+make redis-cli
+
+# View logs
+make redis-logs
+```
+
+### Stop Redis
+
+```bash
+docker compose down
+# Or: make redis-down
+```
+
+## Deploying
+
+Nazaya Haven supports two deployment models: **GitHub Pages** (static, no server) and **Vercel** (dynamic with API routes and Redis caching).
+
+### Deploy to GitHub Pages (Static)
+
+GitHub Pages is automatic. Push to `main` branch:
+
+```bash
+git push origin main
+```
+
+The `pages.yml` workflow will:
+1. Build the static export (`next build`)
+2. Publish to GitHub Pages (`gh-pages` branch)
+3. Site is live at `https://<owner>.github.io/<repo>` (or `https://<owner>.github.io` for org/user pages)
+
+**What works on GitHub Pages:**
+- All UI routes (/, /login, /dashboard, etc.)
+- Demo-mode chat and resource search (canned responses, no AI)
+- No server secrets, no /api routes, no Redis
+
+**Local testing:**
+```bash
+npm run build:static
+npm run serve:static
+```
+
+### Deploy to Vercel (Dynamic + Redis)
+
+Vercel hosts the full Next.js app with /api routes, Redis caching, and live AI responses.
+
+#### Option 1: Git Integration (Recommended)
+
+1. Go to [vercel.com](https://vercel.com)
+2. Click **Import Project** → Select your GitHub repo
+3. Vercel auto-detects Next.js 15
+4. Set environment variables in Vercel dashboard:
+   - **Settings** → **Environment Variables**
+   - Add all secrets from `.env.example`:
+     - `ANTHROPIC_API_KEY` (required for live chat)
+     - `REDIS_URL` (required for cache/memory)
+       - Use a managed Redis service: **Redis Cloud** (free tier with RedisJSON + RediSearch modules) or **Upstash** (serverless-first, basic features)
+       - Format: `rediss://default:PASSWORD@host.redis.cloud.com:PORT` (TLS required)
+     - Optional: `DEEPGRAM_API_KEY`, `AGENTVERSE_API_TOKEN`, etc.
+
+5. Deploy:
+   - Push to `main` branch → Auto-deploy to production
+   - Push to any other branch → Auto-deploy to preview environment
+
+**Redis Service Decision:**
+
+| Feature | Redis Cloud | Upstash |
+|---------|------------|---------|
+| **Free Tier** | 30 MB, includes RedisJSON + RediSearch | 256 MB, includes JSON + Search (proprietary) |
+| **Vector KNN** | ✓ Yes (standard RediSearch) | ? Limited (proprietary Search) |
+| **Modules** | RedisJSON, RediSearch, TimeSeries, Bloom | Proprietary JSON/Search implementation |
+| **Best for** | Full memory layer (JSON + vector search) | Cache-only or basic features |
+| **Connection** | `node-redis` client (standard TCP) | HTTP REST API or `@upstash/redis` client |
+
+**Recommendation:** Use **Redis Cloud** for full RedisJSON + RediSearch vector features. Use **Upstash** only if you need serverless-first architecture and don't require standard RediSearch.
+
+#### Option 2: Vercel CLI
+
+Link your project (one time):
+
+```bash
+vercel login
+vercel link
+```
+
+Pull env vars from Vercel:
+
+```bash
+vercel env pull
+```
+
+Edit `.env.local` with secrets, then push back:
+
+```bash
+vercel env push
+```
+
+Deploy:
+
+```bash
+# Preview environment
+vercel deploy
+
+# Production
+vercel deploy --prod
+```
+
+**Makefile shortcuts:**
+
+```bash
+make deploy-vercel          # Deploy to Vercel preview
+make deploy-vercel-prod     # Deploy to Vercel production
+```
+
+#### Environment Variables
+
+**Vercel requires:**
+- `ANTHROPIC_API_KEY` (Anthropic Claude API key)
+- `REDIS_URL` (managed Redis connection string, e.g., `rediss://...`)
+
+**Optional:**
+- `DEEPGRAM_API_KEY` (voice intake)
+- `AGENTVERSE_API_TOKEN` (agent orchestration)
+- `CONDUCTOR_SERVER_URL` + `CONDUCTOR_AUTH_TOKEN` (workflow orchestration)
+
+All variables are set in Vercel dashboard under **Settings** → **Environment Variables**. Do NOT commit secrets to git.
+
+**Vercel env commands:**
+
+```bash
+vercel env pull          # Download all env vars to .env.local
+vercel env add VAR_NAME  # Interactively add a secret
+vercel env rm VAR_NAME   # Remove a secret
+vercel env ls            # List all secrets (redacted)
+```
+
+#### Testing Hosted Locally
+
+Test Vercel's behavior locally before deploying:
+
+```bash
+npm run build:hosted     # Build with NAZAYA_RUNTIME=hosted (disables static export)
+npm start                # Start production server
+
+# Test with local Redis
+REDIS_URL=redis://:local-dev@localhost:6379 npm run build:hosted
+REDIS_URL=redis://:local-dev@localhost:6379 npm start
+```
+
+### Summary: Deploy Checklist
+
+**For GitHub Pages:**
+- ✓ No secrets needed
+- ✓ `git push origin main`
+- ✓ Site live in ~1 minute
+
+**For Vercel:**
+- ✓ Create Vercel account and import repo
+- ✓ Set `ANTHROPIC_API_KEY` + `REDIS_URL` in Vercel dashboard
+- ✓ Push to `main` or any branch
+- ✓ Production auto-deploys to main; other branches get preview URLs
+
 ## Checks
 
 Use npm scripts on every platform, including Windows. The Makefile mirrors these

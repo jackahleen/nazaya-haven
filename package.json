@@ -24,7 +24,9 @@
     "verify:pages": "npm run typecheck && npm run lint && npm run build:static",
     "verify:static": "npm run verify:pages && npm run test:static",
     "verify:hosted": "npm run typecheck && npm run lint && npm run build:hosted",
-    "verify:deploy": "npm run verify:static && npm run build:hosted && npm run test:browserbase"
+    "verify:deploy": "npm run verify:static && npm run build:hosted && npm run test:browserbase",
+    "redis:up": "docker compose up -d redis",
+    "redis:down": "docker compose down"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
