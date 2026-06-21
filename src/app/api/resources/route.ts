@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cacheKey } from "@/lib/cache/cache-keys";
-import { readJsonCache, writeJsonCache } from "@/lib/cache/json-cache";
+import { writeJsonCache } from "@/lib/cache/json-cache";
+import { getCachedResources } from "@/lib/resources/free-source-cache";
+import type { CommunityResourceCategory, CommunityResourceResults } from "@/data/community-resources";
 
 const VALID_CATEGORIES = [
   "housing",
@@ -27,6 +29,14 @@ const CATEGORY_HINTS: Record<Category, string> = {
   health: "free or low-cost therapy, mental health clinics, community health centers, sliding-scale healthcare",
   community: "LGBTQ centers, community centers, peer support groups, general social services",
 };
+
+/**
+ * Helper to check if a category has meaningful results
+ */
+function hasResults(results: CommunityResourceResults, category: CommunityResourceCategory): boolean {
+  const items = results[category];
+  return Array.isArray(items) && items.length > 0;
+}
 
 export async function POST(req: NextRequest) {
   const { zip, categories } = await req.json();
@@ -56,31 +66,45 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const cacheCategories = [...selected].sort();
-  const key = cacheKey("resource-search", { zip, selected: cacheCategories });
-  const cached = await readJsonCache(key);
-  if (cached) {
-    return NextResponse.json(cached, {
-      headers: { "x-nazaya-cache": "hit" },
+  // CACHE-FIRST: Try Redis then free sources
+  const freeResults = await getCachedResources({
+    zip,
+    categories: selected,
+  });
+
+  // Check which categories have NO local results (gaps to fill with Claude)
+  const gapsNeedingClaude = selected.filter((cat) => !hasResults(freeResults, cat));
+
+  // If all categories are satisfied by free sources, return immediately
+  if (gapsNeedingClaude.length === 0) {
+    return NextResponse.json(freeResults, {
+      headers: {
+        "x-nazaya-source": "cache",
+        "x-nazaya-cache": "hit",
+      },
     });
   }
 
+  // Fallback when no API key or no gaps: return free results as-is
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return NextResponse.json(
-      { error: "Server is missing an API key." },
-      { status: 500 }
-    );
+    return NextResponse.json(freeResults, {
+      headers: {
+        "x-nazaya-source": "free",
+        "x-nazaya-cache": "no-api",
+      },
+    });
   }
 
-  const categoryInstructions = selected
+  // Call Claude only for gap-filling
+  const categoryInstructions = gapsNeedingClaude
     .map(
       (cat) =>
         `- "${cat}" (${CATEGORY_LABELS[cat]}): ${CATEGORY_HINTS[cat]}`
     )
     .join("\n");
 
-  const jsonShape = selected
+  const jsonShape = gapsNeedingClaude
     .map((cat) => `    "${cat}": [ { "name": "", "description": "", "phone": "", "website": "", "address": "" } ]`)
     .join(",\n");
 
@@ -118,10 +142,13 @@ If a field is unknown, use an empty string. Only include real organizations foun
     if (!response.ok) {
       const errText = await response.text();
       console.error("Anthropic API error:", errText);
-      return NextResponse.json(
-        { error: "Failed to fetch resources." },
-        { status: 502 }
-      );
+      // Fall back to free results instead of erroring
+      return NextResponse.json(freeResults, {
+        headers: {
+          "x-nazaya-source": "free",
+          "x-nazaya-cache": "claude-error",
+        },
+      });
     }
 
     const data = await response.json();
@@ -133,27 +160,47 @@ If a field is unknown, use an empty string. Only include real organizations foun
 
     const cleaned = textBlocks.replace(/```json|```/g, "").trim();
 
-    let parsed;
+    let parsed: CommunityResourceResults;
     try {
       parsed = JSON.parse(cleaned);
     } catch {
       console.error("Could not parse Claude response:", cleaned);
-      return NextResponse.json(
-        { error: "Could not parse resource data." },
-        { status: 502 }
-      );
+      // Fall back to free results instead of erroring
+      return NextResponse.json(freeResults, {
+        headers: {
+          "x-nazaya-source": "free",
+          "x-nazaya-cache": "parse-error",
+        },
+      });
     }
 
-    await writeJsonCache(key, parsed, 60 * 60 * 24);
+    // Merge Claude results with free results
+    const merged: CommunityResourceResults = { ...freeResults };
+    for (const category of gapsNeedingClaude) {
+      if (parsed[category]) {
+        merged[category] = parsed[category];
+      }
+    }
 
-    return NextResponse.json(parsed, {
-      headers: { "x-nazaya-cache": "miss" },
+    // Cache the merged results
+    const cacheCategories = [...selected].sort();
+    const key = cacheKey("resource-search", { zip, selected: cacheCategories });
+    await writeJsonCache(key, merged, 60 * 60 * 24);
+
+    return NextResponse.json(merged, {
+      headers: {
+        "x-nazaya-source": "mixed",
+        "x-nazaya-cache": "miss",
+      },
     });
   } catch (err) {
-    console.error("Resource search failed:", err);
-    return NextResponse.json(
-      { error: "Something went wrong." },
-      { status: 500 }
-    );
+    console.error("Claude resource search failed:", err);
+    // Fall back gracefully to free results
+    return NextResponse.json(freeResults, {
+      headers: {
+        "x-nazaya-source": "free",
+        "x-nazaya-cache": "fetch-error",
+      },
+    });
   }
 }
