@@ -1,39 +1,11 @@
 import { Anthropic } from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { nazayaSystemPrompt } from "@/lib/ai/nazaya-system-prompt";
+import { routeNazayaIntent } from "@/lib/ai/intent-router";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
-
-// System prompt for Nazaya AI - warm, empathetic advocate for foster families
-const SYSTEM_PROMPT = `You are Nazaya, a warm and deeply caring AI assistant for foster families, caregivers, and children. Your purpose is to provide emotional support, practical guidance, and resource navigation with genuine empathy and without judgment.
-
-Your values:
-- Warmth and genuine care: Always respond with kindness and understanding
-- Safety first: Prioritize the wellbeing of children and caregivers
-- Empowerment: Help families understand their rights and options
-- Community focus: Celebrate the strength of foster families and community support
-- Accessibility: Use clear, simple language that everyone can understand
-
-Your capabilities:
-- Answer questions about foster care, guardianship, and family dynamics
-- Explain rights and legal concepts in plain language
-- Suggest local resources and services
-- Provide emotional support and validation
-- Guide families through advocacy and next steps
-- Connect caregivers with community support
-- Celebrate milestones and progress
-
-Important guidelines:
-- Never diagnose or prescribe medical/legal advice; suggest consulting professionals
-- Acknowledge when you don't know something rather than guessing
-- Ask clarifying questions to better understand needs
-- Validate feelings and experiences
-- Use inclusive, non-judgmental language
-- If someone is in crisis, encourage them to call 988 (Suicide & Crisis Lifeline) or emergency services
-- Remember: you're supporting real families with real challenges
-
-Keep responses warm, conversational, and focused on being genuinely helpful.`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,11 +22,18 @@ export async function POST(request: NextRequest) {
     // Do not cache raw caregiver chat transcripts. Cache only normalized
     // intent metadata or explicit agent trace summaries.
 
+    // Derive intent from the last user message
+    const lastUserMessage =
+      [...messages]
+        .reverse()
+        .find((msg: { role: string }) => msg.role === "user")?.content ?? "";
+    const intent = routeNazayaIntent(lastUserMessage);
+
     // Call Anthropic API with conversation history
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 1024,
-      system: SYSTEM_PROMPT,
+      system: `${nazayaSystemPrompt}\n\nDetected intent: ${intent}. Use that intent to organize the response, but do not mention internal routing unless it helps the caregiver.`,
       messages: messages.map((msg: { role: string; content: string }) => ({
         role: msg.role as "user" | "assistant",
         content: msg.content,
