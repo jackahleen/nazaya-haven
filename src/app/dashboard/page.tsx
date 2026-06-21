@@ -5,6 +5,7 @@ import {
   IconFeed,
   IconGroups,
   IconJournal,
+  IconLegal,
   IconMap,
 } from "@/components/icons";
 import { PageShell } from "@/components/PageShell";
@@ -27,6 +28,13 @@ const sections = [
     description:
       "Discover local services, clinics, legal aid, and community programs on an interactive map.",
     icon: <IconMap />,
+  },
+  {
+    title: "Legal Navigation",
+    description:
+      "Find local legal services for restraining orders, custody, court forms, and family support.",
+    icon: <IconLegal />,
+    href: "/legal",
   },
   {
     title: "Journal",
@@ -67,14 +75,27 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {sections.map((section) => (
-          <DashboardCard
-            key={section.title}
-            title={section.title}
-            description={section.description}
-            icon={section.icon}
-          />
-        ))}
+        {sections.map((section) => {
+          const card = (
+            <DashboardCard
+              key={section.title}
+              title={section.title}
+              description={section.description}
+              icon={section.icon}
+            />
+          );
+          
+          // Wrap Legal Navigation card in a link
+          if ("href" in section && section.href) {
+            return (
+              <Link key={section.title} href={section.href} className="no-underline">
+                {card}
+              </Link>
+            );
+          }
+          
+          return card;
+        })}
       </div>
 
       <p className="mt-10 text-center text-sm text-ink-muted">
