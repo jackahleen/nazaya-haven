@@ -8,6 +8,7 @@
     "build:static": "next build",
     "build:hosted": "node tools/build-hosted.mjs",
     "start": "next start",
+    "start:hosted": "node tools/start-hosted.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "serve:static": "serve out -l tcp://127.0.0.1:3000",
@@ -24,7 +25,7 @@
     "verify:pages": "npm run typecheck && npm run lint && npm run build:static",
     "verify:static": "npm run verify:pages && npm run test:static",
     "verify:hosted": "npm run typecheck && npm run lint && npm run build:hosted",
-    "verify:deploy": "npm run verify:static && npm run build:hosted && npm run test:browserbase",
+    "verify:deploy": "npm run verify:static && npm run verify:hosted && npm run test:hosted-api && npm run test:browserbase",
     "redis:up": "docker compose up -d redis",
     "redis:down": "docker compose down"
   },

@@ -1,4 +1,4 @@
-.PHONY: help install dev typecheck lint build build-static build-hosted preview test test-static test-static-chromium test-runtime test-browserbase demo-record verify verify-pages verify-static verify-hosted verify-deploy deploy-vercel deploy-vercel-preview deploy-vercel-prod redis-up redis-down redis-cli redis-logs dev-redis cache-demo clean
+.PHONY: help install dev typecheck lint build build-static build-hosted preview test test-static test-static-chromium test-button-proofs test-hosted-api test-runtime test-browserbase demo-record verify verify-pages verify-static verify-hosted verify-deploy deploy-vercel deploy-vercel-preview deploy-vercel-prod redis-up redis-down redis-cli redis-logs dev-redis cache-demo clean
 
 # Default target: show help
 help:
@@ -27,6 +27,8 @@ help:
 	@echo "Testing:"
 	@echo "  make test             Run static e2e tests (Playwright)"
 	@echo "  make test-static      Run static e2e tests (Playwright)"
+	@echo "  make test-button-proofs Run visible button proof suite"
+	@echo "  make test-hosted-api  Run hosted/Vercel API proof suite"
 	@echo "  make test-runtime     Run focused static/runtime fallback tests"
 	@echo "  make test-browserbase Run Browserbase cloud smoke lane"
 	@echo "  make demo-record      Record a local walkthrough video"
@@ -83,6 +85,12 @@ test-static:
 
 test-static-chromium:
 	npm run test:static:chromium
+
+test-button-proofs:
+	npm run test:button-proofs
+
+test-hosted-api:
+	npm run test:hosted-api
 
 test-runtime:
 	npm run test:runtime

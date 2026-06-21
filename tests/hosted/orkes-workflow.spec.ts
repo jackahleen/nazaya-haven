@@ -14,15 +14,16 @@ test("workflow notify route accepts valid payload", async ({ request }) => {
 
   expect(response.status()).toBe(202);
   const body = await response.json();
+  expect(body.queued).toBe(true);
   expect(body.status).toBe("queued");
-  expect(body.provider).toBe("orkes");
+  expect(body.workflowId).toBeNull();
+  expect(body.note).toContain("Orkes workflow dispatch is not configured");
 });
 
 test("workflow notify route validates required fields", async ({ request }) => {
   const response = await request.post("/api/workflow/notify/", {
     data: {
-      trigger: "agent-task-ready",
-      // Missing message
+      message: "Missing trigger",
     },
   });
 
@@ -44,6 +45,8 @@ test("workflow notify queues stub when Conductor credentials absent", async ({
 
   expect(response.status()).toBe(202);
   const body = await response.json();
+  expect(body.queued).toBe(true);
   expect(body.status).toBe("queued");
-  expect(body.id).toBeDefined();
+  expect(body.workflowId).toBeNull();
+  expect(body.note).toContain("Orkes workflow dispatch is not configured");
 });

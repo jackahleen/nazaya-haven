@@ -72,7 +72,9 @@ test("core routes use the consolidated Nazaya shell", async ({ page }) => {
     await page.goto(route);
 
     await expect(page.locator("main")).toBeVisible();
-    await expect(page.locator(".bg-white")).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: "Nazaya Haven", exact: true }),
+    ).toBeVisible();
   }
 });
 

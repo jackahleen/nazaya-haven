@@ -43,7 +43,6 @@ jobs:
           echo "Browserbase API key present; proceeding with smoke tests."
 
       - name: Install Playwright Chromium
-        if: ${{ steps.browserbase-credentials.outputs.configured == 'true' }}
         run: npx playwright install --with-deps chromium
 
       - name: Determine preview URL
@@ -65,6 +64,10 @@ jobs:
           PREVIEW_URL: ${{ steps.preview-url.outputs.url }}
         run: npm run test:browserbase
 
+      - name: Run local button proof fallback
+        if: ${{ steps.browserbase-credentials.outputs.configured != 'true' }}
+        run: npm run test:button-proofs
+
       - name: Upload Browserbase screenshots
         if: always()
         uses: actions/upload-artifact@v7
@@ -78,4 +81,4 @@ jobs:
         run: |
           echo "## Browserbase Smoke Test Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview deployed at: ${{ steps.preview-url.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Cloud browser sessions completed." >> "$GITHUB_STEP_SUMMARY"
+          echo "Cloud browser sessions completed when credentials were configured; otherwise local button proofs ran." >> "$GITHUB_STEP_SUMMARY"

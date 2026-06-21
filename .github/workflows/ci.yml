@@ -7,6 +7,7 @@ on:
       - main
       - "superpowers/**"
       - "cursor/**"
+      - "feat/**"
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -35,3 +36,19 @@ jobs:
 
       - name: Verify static app
         run: npm run verify:static
+
+      - name: Verify hosted build
+        run: npm run verify:hosted
+
+      - name: Run hosted API proofs
+        run: npm run test:hosted-api
+
+      - name: Upload Playwright proof artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-proofs
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore

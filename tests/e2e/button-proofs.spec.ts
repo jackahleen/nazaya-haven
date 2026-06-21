@@ -8,14 +8,18 @@ import { expect, test } from "@playwright/test";
 test.describe("Home page buttons", () => {
   test("Get Started button routes to login", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: /Get Started/i }).click();
+    await page.getByLabel("A Safe Place. A Stronger").getByRole("link", {
+      name: "Get Started",
+    }).click();
     await expect(page).toHaveURL(/\/login\/?$/);
   });
 
-  test("Explore Resources button routes to resources", async ({ page }) => {
+  test("Explore Resources button routes to dashboard", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: /Explore Resources/i }).click();
-    await expect(page).toHaveURL(/\/resources\/?$/);
+    await page.getByLabel("A Safe Place. A Stronger").getByRole("link", {
+      name: "Explore Resources",
+    }).click();
+    await expect(page).toHaveURL(/\/dashboard\/?$/);
   });
 });
 
@@ -43,7 +47,7 @@ test.describe("Dashboard card navigation", () => {
     for (const { title, href } of cardRoutes) {
       await page.goto("/dashboard/");
       await page.getByRole("link", { name: title }).click();
-      await expect(page).toHaveURL(href + "/?$");
+      await expect(page).toHaveURL(new RegExp(`${href}/?$`));
     }
   });
 
@@ -51,7 +55,7 @@ test.describe("Dashboard card navigation", () => {
     await page.goto("/dashboard/");
     const accountLink = page.getByRole("link", { name: "Account" });
     await expect(accountLink).toBeVisible();
-    await expect(accountLink).toHaveAttribute("href", /\/dashboard#account/);
+    await expect(accountLink).toHaveAttribute("href", /\/dashboard\/?#account/);
   });
 });
 
@@ -136,7 +140,7 @@ test.describe("Resources page", () => {
     await page.getByRole("button", { name: "Search" }).click();
 
     // Wait for results
-    await expect(page.getByText(/Housing/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Housing" })).toBeVisible();
 
     // Click handoff button
     const handoffBtn = page.getByRole("button", {
@@ -146,7 +150,7 @@ test.describe("Resources page", () => {
       await handoffBtn.first().click();
 
       // Should show demo dispatch result
-      await expect(page.getByText(/Demo dispatch/i)).toBeVisible();
+      await expect(page.getByText("Demo Dispatch", { exact: true })).toBeVisible();
       await expect(page.getByText(/dispatch-/)).toBeVisible();
     }
   });
@@ -164,8 +168,9 @@ test.describe("Documents page", () => {
     // Check for workflow stages
     const stages = ["Upload", "Classify", "Recommend", "Prefill", "Review"];
     for (const stage of stages) {
-      const element = page.getByText(stage);
-      await expect(element).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: stage }).first(),
+      ).toBeVisible();
     }
   });
 

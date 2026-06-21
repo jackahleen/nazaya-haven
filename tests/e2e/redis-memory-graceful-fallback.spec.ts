@@ -5,21 +5,20 @@ import { test, expect } from "@playwright/test";
  */
 
 test("Session memory should work without Redis", async ({ page }) => {
-  // Load the demo page
-  await page.goto("http://localhost:3000");
+  // Load the authenticated demo surface where memory status is mounted.
+  await page.goto("/dashboard/");
 
   // Verify page loads (even without Redis)
   await expect(page).toHaveTitle(/Nazaya Haven/i);
 
-  // SessionMemoryPanel should show in-memory fallback indicator
-  const memoryPanel = page.locator("text=Session Memory");
-  await expect(memoryPanel).toBeVisible();
+  await expect(page.getByText("Redis trace store")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Redis" })).toBeVisible();
+  await expect(page.getByText("PLAI adapter excluded")).toBeVisible();
 
-  // Should show either Redis Active or In-Memory Fallback
-  const statusPill = page.locator('[class*="bg-"]').filter({
-    hasText: /Redis Active|In-Memory Fallback|Checking/,
-  });
-  await expect(statusPill).toBeVisible();
+  // Should show either Redis Active or In-Memory Fallback.
+  await expect(
+    page.getByText(/Redis Active|In-Memory Fallback|In-Memory Demo|Checking/).first(),
+  ).toBeVisible();
 });
 
 test("Chat should work without Redis (graceful degradation)", async ({

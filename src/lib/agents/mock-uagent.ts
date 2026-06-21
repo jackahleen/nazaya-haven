@@ -5,7 +5,7 @@
  * credentials. Used as fallback when AGENTVERSE_API_TOKEN is unavailable.
  *
  * The progression (queued -> running -> completed) is deterministic, derived
- * from a stable hash + a poll counter, not Date.now() or Math.random().
+ * from a stable dispatch hash + a poll counter, not Date.now() or Math.random().
  */
 
 import { createHash } from "crypto";
@@ -24,23 +24,23 @@ export interface MockAgentState {
 }
 
 /**
- * Derive a pseudo-random but deterministic stage progression from a dispatch ID
- * and poll counter. The progression is:
- *   poll 0-1: queued
- *   poll 2-3: running
- *   poll 4+: completed
+ * Derive a deterministic stage progression from a dispatch ID and poll counter.
+ * The dispatch hash adds a stable 0-2 poll offset, so stages never regress:
+ *   poll < 2 + offset: queued
+ *   poll < 4 + offset: running
+ *   later polls: completed
  */
 function deriveStage(
   dispatchId: string,
   pollCount: number,
 ): LaneDispatchStatus {
   // Use hash to seed variance, but keep transitions stable across reruns
-  const hashVal = createHash("sha256")
-    .update(`${dispatchId}:${pollCount}`)
-    .digest("hex")
-    .charCodeAt(0);
+  const hashVal = parseInt(
+    createHash("sha256").update(dispatchId).digest("hex").slice(0, 2),
+    16,
+  );
 
-  // Deterministic thresholds (using hash value to vary slightly, but predictably)
+  // Deterministic thresholds vary by dispatch, not by poll, so status is monotonic.
   const hashMod = hashVal % 3;
   if (pollCount < 2 + hashMod) return "queued";
   if (pollCount < 4 + hashMod) return "running";

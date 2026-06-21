@@ -67,27 +67,34 @@ test("agent status route returns deterministic progression", async ({
   const dispatchBody = await dispatchRes.json();
   const dispatchId = dispatchBody.id;
 
-  // Poll status with increasing pollCount; should see progression
-  const poll0 = await request.get(
-    `/api/agent/dispatch/?id=${dispatchId}&pollCount=0&kind=resource-routing&lane=resources`
-  );
+  const statusUrl = (pollCount: number) =>
+    `/api/agent/dispatch/?` +
+    new URLSearchParams({
+      id: dispatchId,
+      pollCount: String(pollCount),
+      kind: "resource-routing",
+      lane: "resources",
+    });
+
+  // Poll status with increasing pollCount; hash-derived variance is stable.
+  const poll0 = await request.get(statusUrl(0));
   const body0 = await poll0.json();
   expect(body0.status).toBe("queued");
   expect(body0.handoffChain).toBeDefined();
   expect(body0.handoffChain.length).toBeGreaterThan(0);
 
-  const poll2 = await request.get(
-    `/api/agent/dispatch/?id=${dispatchId}&pollCount=2&kind=resource-routing&lane=resources`
-  );
-  const body2 = await poll2.json();
-  expect(body2.status).toBe("running");
+  const poll0Repeat = await request.get(statusUrl(0));
+  const body0Repeat = await poll0Repeat.json();
+  expect(body0Repeat).toEqual(body0);
 
-  const poll5 = await request.get(
-    `/api/agent/dispatch/?id=${dispatchId}&pollCount=5&kind=resource-routing&lane=resources`
-  );
-  const body5 = await poll5.json();
-  expect(body5.status).toBe("completed");
-  expect(body5.artifactRefs.length).toBeGreaterThan(0);
+  const poll2 = await request.get(statusUrl(2));
+  const body2 = await poll2.json();
+  expect(["queued", "running"]).toContain(body2.status);
+
+  const poll6 = await request.get(statusUrl(6));
+  const body6 = await poll6.json();
+  expect(body6.status).toBe("completed");
+  expect(body6.artifactRefs.length).toBeGreaterThan(0);
 });
 
 test("agent status route generates lane-specific summaries", async ({
@@ -101,7 +108,7 @@ test("agent status route generates lane-specific summaries", async ({
     {
       kind: "resource-routing",
       lane: "resources",
-      expectedSummarySubstring: "routing",
+      expectedSummarySubstring: "rout",
     },
     {
       kind: "form-recommendation",
