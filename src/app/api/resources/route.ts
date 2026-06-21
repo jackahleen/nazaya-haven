@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cacheKey } from "@/lib/cache/cache-keys";
 import { readJsonCache, writeJsonCache } from "@/lib/cache/json-cache";
+import {
+  getOrCreateSessionContext,
+  updateSessionContext,
+} from "@/lib/memory/agent-memory";
+import { recordResourceSearch } from "@/lib/memory/cross-context";
+import {
+  getSessionIdFromRequest,
+  getUserIdFromRequest,
+} from "@/lib/memory/session-utils";
 
 const VALID_CATEGORIES = [
   "housing",
@@ -29,7 +38,14 @@ const CATEGORY_HINTS: Record<Category, string> = {
 };
 
 export async function POST(req: NextRequest) {
-  const { zip, categories } = await req.json();
+  const { zip, categories, sessionId: clientSessionId } = await req.json();
+
+  // Derive session ID
+  const sessionId = clientSessionId || (await getSessionIdFromRequest(req)) || "session-unknown";
+  const userId = getUserIdFromRequest(req) || undefined;
+
+  // Load or create session context
+  const sessionContext = await getOrCreateSessionContext(sessionId, userId);
 
   if (!zip || typeof zip !== "string" || !/^\d{5}$/.test(zip)) {
     return NextResponse.json(
@@ -56,10 +72,35 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Update session context with search info
+  await updateSessionContext(sessionId, {
+    currentLane: "resources",
+    entities: {
+      ...sessionContext.entities,
+      zip_code: zip,
+      concern_tags: selected.join(","),
+    },
+  });
+
   const cacheCategories = [...selected].sort();
   const key = cacheKey("resource-search", { zip, selected: cacheCategories });
   const cached = await readJsonCache(key);
   if (cached) {
+    // Record resource views in memory (for cross-context)
+    const cachedData = cached as Record<string, unknown>;
+    if (Array.isArray(cachedData.housing)) {
+      for (const res of cachedData.housing.slice(0, 3)) {
+        const resource = res as Record<string, unknown>;
+        await recordResourceSearch(sessionId, String(resource.name || ""), String(resource.name || ""), "housing");
+      }
+    }
+    if (Array.isArray(cachedData.family)) {
+      for (const res of cachedData.family.slice(0, 3)) {
+        const resource = res as Record<string, unknown>;
+        await recordResourceSearch(sessionId, String(resource.name || ""), String(resource.name || ""), "family");
+      }
+    }
+
     return NextResponse.json(cached, {
       headers: { "x-nazaya-cache": "hit" },
     });
@@ -145,6 +186,24 @@ If a field is unknown, use an empty string. Only include real organizations foun
     }
 
     await writeJsonCache(key, parsed, 60 * 60 * 24);
+
+    // Record resource views in memory (for cross-context)
+    const parsedData = parsed as Record<string, unknown>;
+    for (const category of Object.keys(parsedData)) {
+      if (category === "national") continue;
+      const resources = parsedData[category];
+      if (Array.isArray(resources)) {
+        for (const res of resources.slice(0, 3)) {
+          const resource = res as Record<string, unknown>;
+          await recordResourceSearch(
+            sessionId,
+            String(resource.name || "unknown"),
+            String(resource.name || "unknown"),
+            category
+          );
+        }
+      }
+    }
 
     return NextResponse.json(parsed, {
       headers: { "x-nazaya-cache": "miss" },

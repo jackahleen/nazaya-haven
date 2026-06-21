@@ -151,3 +151,4 @@ docs/superpowers/
 docs/integrations/
 docs/*.pdf
 docs/*.png
+/node_modules
