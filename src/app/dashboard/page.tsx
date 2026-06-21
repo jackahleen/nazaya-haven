@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NazayaChat } from "@/components/chat/NazayaChat";
+import { ChildCornerPreview } from "@/components/child/ChildCornerPreview";
 import { AuthenticatedUserSummary } from "@/components/dashboard/AuthenticatedUserSummary";
 import { DigitalParentingGuide } from "@/components/digital-parenting/DigitalParentingGuide";
 import { DashboardCard } from "@/components/DashboardCard";
@@ -109,6 +110,7 @@ export default function DashboardPage() {
 
       <NazayaChat />
       <DigitalParentingGuide />
+      <ChildCornerPreview />
       <IntegrationReadiness />
 
       <p className="mt-10 text-center text-sm text-ink-muted">
