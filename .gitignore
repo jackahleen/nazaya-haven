@@ -152,3 +152,7 @@ docs/integrations/
 docs/*.pdf
 docs/*.png
 /node_modules
+
+# Sai demo-video scratch
+_video/
+out/

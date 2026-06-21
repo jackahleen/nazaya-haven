@@ -1,4 +1,4 @@
-.PHONY: help install dev typecheck lint build build-static build-hosted preview test test-static test-static-chromium test-runtime test-browserbase verify verify-pages verify-static verify-hosted verify-deploy deploy-vercel deploy-vercel-preview deploy-vercel-prod clean
+.PHONY: help install dev typecheck lint build build-static build-hosted preview test test-static test-static-chromium test-runtime test-browserbase demo-record verify verify-pages verify-static verify-hosted verify-deploy deploy-vercel deploy-vercel-preview deploy-vercel-prod clean
 
 # Default target: show help
 help:
@@ -21,6 +21,7 @@ help:
 	@echo "  make test-static      Run static e2e tests (Playwright)"
 	@echo "  make test-runtime     Run focused static/runtime fallback tests"
 	@echo "  make test-browserbase Run Browserbase cloud smoke lane"
+	@echo "  make demo-record      Record a local walkthrough video"
 	@echo "  make verify           Run typecheck + lint + build + test"
 	@echo "  make verify-pages     Run typecheck + lint + static Pages build"
 	@echo "  make verify-static    Run verify-pages + static e2e tests"
@@ -79,6 +80,9 @@ test-runtime:
 
 test-browserbase:
 	npm run test:browserbase
+
+demo-record:
+	npm run demo:record
 
 # Verify: typecheck + lint + build + test
 verify:
