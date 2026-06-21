@@ -150,6 +150,22 @@ export const integrationProviders = [
     requiredSecretNames: ["REDIS_URL"],
     runtimeSurfaces: ["github-actions", "hosted-next-runtime"],
   },
+  {
+    id: "contextual-ai",
+    name: "Contextual AI",
+    category: "retrieval-ranking",
+    readiness: "service-needed",
+    directConsumer: true,
+    plaiAdapterStatus: "PLAI adapter deferred",
+    appUse:
+      "Re-rank local resources in the resources lane by relevance to the caregiver's specific need; when unset, resources maintain their original order.",
+    ciUse:
+      "Validate rerank API contract when CONTEXTUAL_API_KEY is present; graceful degradation when absent.",
+    nextStep:
+      "Set CONTEXTUAL_API_KEY in Vercel; the client will pass it to Contextual AI's rerank endpoint after Claude returns results.",
+    requiredSecretNames: ["CONTEXTUAL_API_KEY"],
+    runtimeSurfaces: ["hosted-next-runtime"],
+  },
 ] as const satisfies readonly IntegrationProvider[];
 
 export const visibleIntegrationProviders = integrationProviders;

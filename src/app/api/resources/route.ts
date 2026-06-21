@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cacheKey } from "@/lib/cache/cache-keys";
 import { readJsonCache, writeJsonCache } from "@/lib/cache/json-cache";
+import { rerankResources } from "@/integrations/contextual-ai/client";
 
 const VALID_CATEGORIES = [
   "housing",
@@ -142,6 +143,33 @@ If a field is unknown, use an empty string. Only include real organizations foun
         { error: "Could not parse resource data." },
         { status: 502 }
       );
+    }
+
+    // Optionally re-rank resources by relevance to the caregiver's need.
+    // If CONTEXTUAL_API_KEY is not set, this is a no-op (identity pass-through).
+    if (typeof parsed === "object" && parsed !== null) {
+      const needDescription = selected
+        .map((cat: string) => CATEGORY_LABELS[cat as Category])
+        .join(", ");
+
+      // Re-rank each category array
+      for (const category of Object.keys(parsed)) {
+        if (category === "national" || !Array.isArray(parsed[category])) {
+          continue;
+        }
+        const resources = parsed[category];
+        if (resources.length > 0) {
+          parsed[category] = await rerankResources(resources, needDescription);
+        }
+      }
+
+      // Re-rank national resources with a generic query
+      if (Array.isArray(parsed.national) && parsed.national.length > 0) {
+        parsed.national = await rerankResources(
+          parsed.national,
+          "family support and parenting resources",
+        );
+      }
     }
 
     await writeJsonCache(key, parsed, 60 * 60 * 24);
