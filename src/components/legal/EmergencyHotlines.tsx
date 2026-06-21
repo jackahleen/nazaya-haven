@@ -72,7 +72,7 @@ export function EmergencyHotlines() {
       </div>
 
       <p className="mt-4 text-xs text-ink-muted">
-        <strong>Privacy:</strong> Calls to these numbers are confidential. If you're not safe speaking, text "HELP" to 741741 (Crisis Text Line).
+        <strong>Privacy:</strong> Calls to these numbers are confidential. If you&apos;re not safe speaking, text &quot;HELP&quot; to 741741 (Crisis Text Line).
       </p>
     </div>
   );

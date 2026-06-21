@@ -37,7 +37,7 @@ export function LegalResources({
             : "Please search with a valid ZIP code to find resources."}
         </p>
         <p className="mt-4 text-sm text-ink-muted">
-          <strong>Tip:</strong> Try selecting "Browse all resources" to see everything available in your area.
+          <strong>Tip:</strong> Try selecting &quot;Browse all resources&quot; to see everything available in your area.
         </p>
       </div>
     );

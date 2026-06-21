@@ -92,7 +92,7 @@ export function SupportWizard({ onComplete }: SupportWizardProps) {
     <div className="rounded-2xl border-2 border-purple/40 bg-gradient-to-b from-purple/5 to-lavender/5 p-8">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-ink">Let's Find Help Together</h2>
+        <h2 className="text-2xl font-semibold text-ink">Let&apos;s Find Help Together</h2>
         <p className="mt-1 text-sm text-ink-muted">
           Answer a few questions to get personalized resources
         </p>
@@ -140,7 +140,7 @@ export function SupportWizard({ onComplete }: SupportWizardProps) {
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-ink">Where are you located?</h3>
           <p className="text-sm text-ink-muted">
-            We'll find resources near you. We serve the Bay Area and Northern California.
+            We&apos;ll find resources near you. We serve the Bay Area and Northern California.
           </p>
 
           <div className="space-y-2">

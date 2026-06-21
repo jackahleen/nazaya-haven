@@ -65,10 +65,10 @@ export const landingFeatures: LandingFeature[] = [
   {
     title: "Resources Near You",
     description:
-      "Local clinics, legal aid, food banks, and community programs on an interactive map.",
+      "Find local clinics, food banks, and community programs near your zip code.",
     icon: <IconMap />,
     accent: "butter",
-    href: "/dashboard",
+    href: "/resources",
   },
   {
     title: "Journal",
