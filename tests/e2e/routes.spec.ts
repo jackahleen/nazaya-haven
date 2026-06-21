@@ -61,3 +61,22 @@ test("resources page returns static preview results without an API server", asyn
   await expect(page.getByText("Compass Family Services")).toBeVisible();
   await expect(page.getByText("Static preview result: using")).toBeVisible();
 });
+
+test("core routes use the consolidated Nazaya shell", async ({ page }) => {
+  for (const route of ["/dashboard/", "/resources/", "/legal/"]) {
+    await page.goto(route);
+
+    await expect(page.locator("main")).toBeVisible();
+    await expect(page.locator(".bg-white")).toHaveCount(0);
+  }
+});
+
+test("integration readiness surfaces Redis as app infrastructure", async ({
+  page,
+}) => {
+  await page.goto("/dashboard/");
+
+  await expect(page.getByRole("heading", { name: "Redis" })).toBeVisible();
+  await expect(page.getByText("Direct app consumer").last()).toBeVisible();
+  await expect(page.getByText("PLAI adapter excluded")).toBeVisible();
+});

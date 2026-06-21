@@ -1,0 +1,38 @@
+name: Redis Smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  redis:
+    name: Redis connection smoke
+    runs-on: ubuntu-latest
+    env:
+      REDIS_URL: ${{ secrets.REDIS_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Redis secret
+        shell: bash
+        run: |
+          if [ -z "$REDIS_URL" ]; then
+            echo "REDIS_URL is not configured; skipping Redis smoke."
+            exit 0
+          fi
+
+      - name: Ping Redis
+        if: ${{ env.REDIS_URL != '' }}
+        run: node -e "const { createClient } = require('redis'); (async()=>{ const c=createClient({url:process.env.REDIS_URL}); c.on('error', e=>{throw e}); await c.connect(); console.log(await c.ping()); await c.quit(); })()"

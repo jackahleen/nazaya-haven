@@ -47,6 +47,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Do not cache raw caregiver chat transcripts. Cache only normalized
+    // intent metadata or explicit agent trace summaries.
+
     // Call Anthropic API with conversation history
     const response = await client.messages.create({
       model: "claude-3-5-sonnet-20241022",

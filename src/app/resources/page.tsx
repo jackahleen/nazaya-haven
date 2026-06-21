@@ -8,6 +8,9 @@ import {
   findStaticCommunityResources,
 } from "@/data/community-resources";
 import { PageShell } from "@/components/PageShell";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { Surface } from "@/components/ui/Surface";
 
 const CATEGORIES: { id: CommunityResourceCategory; label: string }[] = [
   { id: "housing", label: "Housing" },
@@ -85,15 +88,19 @@ export default function ResourcesPage() {
 
   return (
     <PageShell maxWidth="full">
-      <h1 className="text-3xl font-semibold text-ink sm:text-4xl">
-        Resources Near You
-      </h1>
-      <p className="mt-2 max-w-xl text-ink-muted">
-        Tell us what you need help with and your zip code, and we&apos;ll find
-        local and national resources for you.
-      </p>
+      <Surface className="bg-lavender-light">
+        <SectionHeader
+          eyebrow="Resources"
+          title="Resources Near You"
+          description="Tell us what you need help with and your zip code, and we'll find local and national resources for you."
+        />
+      </Surface>
 
       <form onSubmit={handleSearch} className="mt-8 max-w-2xl space-y-6">
+        <div className="flex flex-wrap gap-2">
+          <StatusPill tone="mint">Insurance path</StatusPill>
+          <StatusPill tone="butter">Free or sliding-scale path</StatusPill>
+        </div>
         <div>
           <p className="mb-3 text-sm font-medium text-ink">
             What do you need help with?
@@ -195,6 +202,9 @@ function ResourceCard({ resource }: { resource: CommunityResource }) {
           Visit website →
         </a>
       )}
+      <p className="mt-2 text-sm font-medium text-purple-deep">
+        Booking support available through the resource website
+      </p>
     </article>
   );
 }

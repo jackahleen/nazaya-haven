@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cacheKey } from "@/lib/cache/cache-keys";
+import { readJsonCache, writeJsonCache } from "@/lib/cache/json-cache";
 
 const VALID_CATEGORIES = [
   "housing",
@@ -52,6 +54,15 @@ export async function POST(req: NextRequest) {
       { error: "No valid categories selected." },
       { status: 400 }
     );
+  }
+
+  const cacheCategories = [...selected].sort();
+  const key = cacheKey("resource-search", { zip, selected: cacheCategories });
+  const cached = await readJsonCache(key);
+  if (cached) {
+    return NextResponse.json(cached, {
+      headers: { "x-nazaya-cache": "hit" },
+    });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -133,7 +144,11 @@ If a field is unknown, use an empty string. Only include real organizations foun
       );
     }
 
-    return NextResponse.json(parsed);
+    await writeJsonCache(key, parsed, 60 * 60 * 24);
+
+    return NextResponse.json(parsed, {
+      headers: { "x-nazaya-cache": "miss" },
+    });
   } catch (err) {
     console.error("Resource search failed:", err);
     return NextResponse.json(

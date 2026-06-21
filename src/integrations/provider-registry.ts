@@ -115,21 +115,20 @@ export const integrationProviders = [
     id: "redis",
     name: "Redis",
     category: "data-store",
-    readiness: "bookmarked",
-    directConsumer: false,
+    readiness: "service-needed",
+    directConsumer: true,
     plaiAdapterStatus: "PLAI adapter excluded",
     appUse:
-      "Potential app cache or queue store only; do not queue for PLAI conversion because PLAI uses NATS/JetStream.",
-    ciUse: "No CI role selected.",
+      "Cache expensive Claude search outputs, normalized agent traces, and non-PLAI app state. PLAI substrate integration still uses NATS/JetStream.",
+    ciUse:
+      "Run a REDIS_URL smoke check when the secret is present; skip gracefully for static preview builds.",
     nextStep:
-      "Only revisit if the hosted app needs non-PLAI cache or rate-limit state.",
-    requiredSecretNames: [],
+      "Provision REDIS_URL and verify cached resource-search responses before wiring agent trace persistence.",
+    requiredSecretNames: ["REDIS_URL"],
   },
 ] as const satisfies readonly IntegrationProvider[];
 
-export const visibleIntegrationProviders = integrationProviders.filter(
-  (provider) => provider.id !== "redis",
-);
+export const visibleIntegrationProviders = integrationProviders;
 
 export const demoAgentTasks = [
   {
