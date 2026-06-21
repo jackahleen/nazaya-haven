@@ -5,6 +5,7 @@ import {
   visibleIntegrationProviders,
 } from "@/integrations/provider-registry";
 import type { IntegrationReadiness as Readiness } from "@/integrations/contracts";
+import { BrowserbaseCard } from "@/components/integration-readiness/browserbase-card";
 
 const readinessLabels: Record<Readiness, string> = {
   "direct-preview": "Direct preview",
@@ -37,7 +38,9 @@ export function IntegrationReadiness() {
       </div>
 
       <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {visibleIntegrationProviders.map((provider) => (
+        {visibleIntegrationProviders
+          .filter((provider) => provider.id !== "browserbase")
+          .map((provider) => (
           <article
             key={provider.id}
             className="rounded-2xl border border-lavender-deep/40 bg-cream p-4"
@@ -78,6 +81,15 @@ export function IntegrationReadiness() {
             </dl>
           </article>
         ))}
+      </div>
+
+      <div className="mt-7">
+        <h3 className="text-sm font-medium uppercase tracking-wider text-purple-soft">
+          CI tooling detail
+        </h3>
+        <div className="mt-3 md:max-w-md">
+          <BrowserbaseCard />
+        </div>
       </div>
 
       <div className="mt-7 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
