@@ -12,8 +12,14 @@ const githubPagesPath =
       }
     : {};
 
+// GitHub Pages needs a fully static export; Vercel runs the dynamic API routes
+// (and holds the server secrets), so static export is disabled there. Vercel
+// sets VERCEL=1 automatically; NAZAYA_RUNTIME=hosted forces the same locally.
+const isHostedRuntime =
+  Boolean(process.env.VERCEL) || process.env.NAZAYA_RUNTIME === "hosted";
+
 const nextConfig: NextConfig = {
-  output: "export",
+  ...(isHostedRuntime ? {} : { output: "export" as const }),
   trailingSlash: true,
   images: {
     unoptimized: true,

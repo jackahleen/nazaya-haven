@@ -24,6 +24,7 @@ coverage
 *.lcov
 playwright-report/
 test-results/
+tests/browserbase/screenshots/
 
 # nyc test coverage
 .nyc_output
@@ -147,5 +148,6 @@ vite.config.ts.timestamp-*
 
 # Local planning docs
 docs/superpowers/
+docs/integrations/
 docs/*.pdf
 docs/*.png

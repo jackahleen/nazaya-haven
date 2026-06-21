@@ -27,13 +27,18 @@ test("dashboard exposes the core support areas", async ({ page }) => {
 
   await expect(page.getByText("Signed in as")).toBeVisible();
   await expect(page.getByText("Demo Caregiver")).toBeVisible();
+  await expect(page.getByText("Authenticated preview")).toBeVisible();
   await expect(page.getByText("Kinship caregiver preview")).toBeVisible();
   await expect(page.getByText("3 guided tasks queued")).toBeVisible();
+  await expect(page.getByText("Redis trace store")).toBeVisible();
+  await expect(page.getByText("Agent-S tutorial queued")).toBeVisible();
   await expect(page.getByText("Community Feed")).toBeVisible();
   await expect(page.getByText("Support Groups")).toBeVisible();
   await expect(page.getByText("Resources Near You")).toBeVisible();
-  await expect(page.getByText("Nazaya AI")).toBeVisible();
-  await expect(page.getByText("Digital Parenting Guide")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Nazaya AI" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Digital Parenting Guide" }),
+  ).toBeVisible();
   await expect(page.getByText("Show me around Nazaya Haven")).toBeVisible();
   await expect(page.getByText("Agent-S guided walkthrough")).toBeVisible();
   await expect(page.getByText("Notify caregiver when ready")).toBeVisible();

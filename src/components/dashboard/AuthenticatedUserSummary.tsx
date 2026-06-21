@@ -44,6 +44,31 @@ export function AuthenticatedUserSummary() {
             </div>
           ))}
         </div>
+        <div className="mt-4 border-t border-lavender-deep/30 pt-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-purple-soft">
+            Sponsor-backed state
+          </p>
+          <div className="mt-3 space-y-2">
+            {demoSession.sponsorStates.map((state) => (
+              <div
+                key={state.id}
+                className="rounded-2xl bg-lavender-light px-3 py-2"
+              >
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <span className="text-sm font-semibold text-ink">
+                    {state.label}
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-purple-soft">
+                    {state.status}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs leading-relaxed text-ink-muted">
+                  {state.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -1,10 +1,17 @@
 import { cacheKey } from "@/lib/cache/cache-keys";
 import { readJsonCache, writeJsonCache } from "@/lib/cache/json-cache";
+import type { SelectedSponsorProviderId } from "@/integrations/sponsor-adapters";
 
 export type AgentTrace = {
-  provider: "simular" | "fetch-ai" | "orkes" | "browserbase" | "deepgram";
+  provider: SelectedSponsorProviderId;
   taskId: string;
-  lane: "resources" | "documents" | "child-corner" | "chat" | "voice";
+  lane:
+    | "resources"
+    | "documents"
+    | "digital-parenting"
+    | "child-corner"
+    | "chat"
+    | "voice";
   inputSummary: string;
   outputSummary: string;
   artifactRefs: string[];

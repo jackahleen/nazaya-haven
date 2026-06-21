@@ -1,4 +1,5 @@
 export type IntegrationProviderId =
+  | "anthropic"
   | "simular-agent-s"
   | "browserbase"
   | "sentry"
@@ -9,6 +10,7 @@ export type IntegrationProviderId =
   | "redis";
 
 export type IntegrationCategory =
+  | "language-model"
   | "agent-demo"
   | "cloud-browser"
   | "observability"
@@ -29,6 +31,14 @@ export type PlaiAdapterStatus =
   | "PLAI adapter deferred"
   | "PLAI adapter excluded";
 
+// Where a provider can actually run. The static GitHub Pages preview cannot
+// execute API routes or hold secrets, so secret-backed providers list only
+// "github-actions" and/or "hosted-next-runtime" (Vercel).
+export type RuntimeSurface =
+  | "static-preview"
+  | "github-actions"
+  | "hosted-next-runtime";
+
 export type IntegrationProvider = {
   id: IntegrationProviderId;
   name: string;
@@ -40,6 +50,7 @@ export type IntegrationProvider = {
   ciUse: string;
   nextStep: string;
   requiredSecretNames: readonly string[];
+  runtimeSurfaces: readonly RuntimeSurface[];
 };
 
 export type AgentTaskKind =

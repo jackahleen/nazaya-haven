@@ -1,0 +1,42 @@
+name: Dynamic Integration Smoke
+
+# Validates that the hosted-runtime secrets exist without revealing them.
+# Static GitHub Pages never sees these secrets; only this Node job and the
+# Vercel runtime do.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  anthropic-secret-check:
+    name: Anthropic secret availability
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Confirm secret shape without revealing value
+        shell: bash
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "ANTHROPIC_API_KEY is not configured"
+            exit 1
+          fi
+          echo "ANTHROPIC_API_KEY is configured"

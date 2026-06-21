@@ -1,0 +1,81 @@
+name: Browserbase Smoke Tests
+
+on:
+  workflow_run:
+    workflows: ["Publish Static Preview"]
+    types: [completed]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "24"
+
+jobs:
+  browserbase-smoke:
+    name: Run cloud browser smoke tests
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate Browserbase credentials
+        id: browserbase-credentials
+        env:
+          BROWSERBASE_API_KEY: ${{ secrets.BROWSERBASE_API_KEY }}
+          BROWSERBASE_PROJECT_ID: ${{ secrets.BROWSERBASE_PROJECT_ID }}
+        run: |
+          if [ -z "$BROWSERBASE_API_KEY" ]; then
+            echo "BROWSERBASE_API_KEY is not configured. Skipping smoke tests."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+          echo "Browserbase API key present; proceeding with smoke tests."
+
+      - name: Install Playwright Chromium
+        if: ${{ steps.browserbase-credentials.outputs.configured == 'true' }}
+        run: npx playwright install --with-deps chromium
+
+      - name: Determine preview URL
+        id: preview-url
+        shell: bash
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          if [ "$REPO_NAME" = "${GITHUB_REPOSITORY_OWNER}.github.io" ]; then
+            echo "url=https://${GITHUB_REPOSITORY_OWNER}.github.io" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://${GITHUB_REPOSITORY_OWNER}.github.io/${REPO_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Browserbase cloud smoke tests
+        if: ${{ steps.browserbase-credentials.outputs.configured == 'true' }}
+        env:
+          BROWSERBASE_API_KEY: ${{ secrets.BROWSERBASE_API_KEY }}
+          BROWSERBASE_PROJECT_ID: ${{ secrets.BROWSERBASE_PROJECT_ID }}
+          PREVIEW_URL: ${{ steps.preview-url.outputs.url }}
+        run: npm run test:browserbase
+
+      - name: Upload Browserbase screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: browserbase-screenshots
+          path: tests/browserbase/screenshots/
+          if-no-files-found: ignore
+
+      - name: Post smoke test summary to job summary
+        if: always()
+        run: |
+          echo "## Browserbase Smoke Test Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview deployed at: ${{ steps.preview-url.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Cloud browser sessions completed." >> "$GITHUB_STEP_SUMMARY"

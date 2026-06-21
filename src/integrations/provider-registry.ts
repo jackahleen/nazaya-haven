@@ -7,6 +7,22 @@ import type {
 
 export const integrationProviders = [
   {
+    id: "anthropic",
+    name: "Anthropic Claude",
+    category: "language-model",
+    readiness: "service-needed",
+    directConsumer: true,
+    plaiAdapterStatus: "PLAI adapter queued",
+    appUse:
+      "Power Nazaya AI chat, resource search, and legal/document guidance via claude-sonnet-4-6 with the server-side web_search tool.",
+    ciUse:
+      "Read ANTHROPIC_API_KEY from GitHub Secrets only in Node/build smoke jobs (dynamic-smoke.yml); never expose it to static Pages.",
+    nextStep:
+      "Refactor /api/chat to the shared nazaya-system-prompt and confirm the secret via dynamic-smoke.yml.",
+    requiredSecretNames: ["ANTHROPIC_API_KEY"],
+    runtimeSurfaces: ["github-actions", "hosted-next-runtime"],
+  },
+  {
     id: "simular-agent-s",
     name: "Simular Agent-S",
     category: "agent-demo",
@@ -20,6 +36,7 @@ export const integrationProviders = [
     nextStep:
       "Point Agent-S at the authenticated dashboard and digital parenting guide.",
     requiredSecretNames: ["OPENAI_API_KEY", "AGENT_S_GROUND_URL"],
+    runtimeSurfaces: ["github-actions"],
   },
   {
     id: "browserbase",
@@ -33,8 +50,9 @@ export const integrationProviders = [
     ciUse:
       "Add CI smoke checks once BROWSERBASE_API_KEY and project configuration exist.",
     nextStep:
-      "Create a Browserbase project and wire a Playwright-backed cloud smoke job.",
-    requiredSecretNames: ["BROWSERBASE_API_KEY", "BROWSERBASE_PROJECT_ID"],
+      "Create a Browserbase project and wire a Playwright-backed cloud smoke job. BROWSERBASE_PROJECT_ID can be provided explicitly, but the SDK can infer it from the API key.",
+    requiredSecretNames: ["BROWSERBASE_API_KEY"],
+    runtimeSurfaces: ["github-actions"],
   },
   {
     id: "sentry",
@@ -50,6 +68,7 @@ export const integrationProviders = [
     nextStep:
       "Create the Sentry project and add DSN/auth-token secrets before enabling upload.",
     requiredSecretNames: ["NEXT_PUBLIC_SENTRY_DSN", "SENTRY_AUTH_TOKEN"],
+    runtimeSurfaces: ["static-preview", "github-actions", "hosted-next-runtime"],
   },
   {
     id: "deepgram",
@@ -59,12 +78,13 @@ export const integrationProviders = [
     directConsumer: true,
     plaiAdapterStatus: "PLAI adapter queued",
     appUse:
-      "Prototype caregiver voice intake, voice assistant prompts, and transcript summaries.",
+      "Caregiver voice intake and transcript capture through a hosted short-lived token endpoint; static preview falls back to typed input.",
     ciUse:
       "Keep static preview mocked; real tokens need a hosted endpoint or worker.",
     nextStep:
-      "Define the voice-session token endpoint once dynamic hosting is selected.",
+      "Wire src/app/api/voice/deepgram/token to mint short-lived tokens once DEEPGRAM_API_KEY is set on Vercel.",
     requiredSecretNames: ["DEEPGRAM_API_KEY"],
+    runtimeSurfaces: ["hosted-next-runtime"],
   },
   {
     id: "fetch-ai",
@@ -74,12 +94,13 @@ export const integrationProviders = [
     directConsumer: true,
     plaiAdapterStatus: "PLAI adapter queued",
     appUse:
-      "Coordinate resource-routing agents that can accept typed handoffs from Nazaya Haven.",
+      "Coordinate resource-routing agents that can accept typed handoffs from Nazaya Haven via the dispatch contracts.",
     ciUse:
       "Validate contract fixtures before running any external agent process.",
     nextStep:
-      "Stand up a small uAgents worker for resource and form handoff experiments.",
-    requiredSecretNames: ["FETCH_AGENT_SEED"],
+      "Stand up a uAgents worker on Agentverse and point UAGENTS_WORKER_ENDPOINT at it.",
+    requiredSecretNames: ["AGENTVERSE_API_TOKEN"],
+    runtimeSurfaces: ["hosted-next-runtime"],
   },
   {
     id: "orkes",
@@ -89,12 +110,13 @@ export const integrationProviders = [
     directConsumer: true,
     plaiAdapterStatus: "PLAI adapter queued",
     appUse:
-      "Model durable resource, notification, form-start, and follow-up workflows.",
+      "Model durable resource, notification, form-start, and follow-up workflows through the dispatch contracts.",
     ciUse:
       "Validate workflow definitions before posting to Orkes when credentials exist.",
     nextStep:
-      "Draft the caregiver notification workflow around agent task completion.",
-    requiredSecretNames: ["ORKES_KEY_ID", "ORKES_KEY_SECRET"],
+      "Draft the caregiver notification workflow around agent task completion, then provide CONDUCTOR_SERVER_URL and a short-lived CONDUCTOR_AUTH_TOKEN.",
+    requiredSecretNames: ["CONDUCTOR_SERVER_URL", "CONDUCTOR_AUTH_TOKEN"],
+    runtimeSurfaces: ["hosted-next-runtime"],
   },
   {
     id: "cognition",
@@ -106,10 +128,11 @@ export const integrationProviders = [
     appUse:
       "Keep as an engineering or delegated-build candidate until an app-facing use is selected.",
     ciUse:
-      "No CI role yet; evaluate once teammate workflows need a coding-agent lane.",
+      "Optional Devin PR-review job; human code review still required.",
     nextStep:
       "Decide whether Cognition is a build assistant or an in-product agent surface.",
     requiredSecretNames: [],
+    runtimeSurfaces: ["github-actions"],
   },
   {
     id: "redis",
@@ -125,6 +148,7 @@ export const integrationProviders = [
     nextStep:
       "Provision REDIS_URL and verify cached resource-search responses before wiring agent trace persistence.",
     requiredSecretNames: ["REDIS_URL"],
+    runtimeSurfaces: ["github-actions", "hosted-next-runtime"],
   },
 ] as const satisfies readonly IntegrationProvider[];
 

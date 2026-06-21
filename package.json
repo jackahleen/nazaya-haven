@@ -9,10 +9,12 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "serve:static": "serve out -l tcp://127.0.0.1:3000",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:browserbase": "playwright test --config=playwright.config.browserbase.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
+    "@browserbasehq/sdk": "^2.14.1",
     "next": "^15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
