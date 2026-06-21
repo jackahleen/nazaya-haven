@@ -1,0 +1,63 @@
+name: Sentry Release
+
+on:
+  workflow_run:
+    workflows: ["Publish Static Preview"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sentry-release:
+    name: Upload Sentry source maps
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+    env:
+      NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+      NEXT_PUBLIC_SENTRY_RELEASE: ${{ github.sha }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate Sentry release secrets
+        id: sentry
+        shell: bash
+        run: |
+          missing=""
+          for name in NEXT_PUBLIC_SENTRY_DSN SENTRY_AUTH_TOKEN SENTRY_ORG SENTRY_PROJECT; do
+            if [ -z "${!name}" ]; then
+              missing="$missing $name"
+            fi
+          done
+
+          if [ -n "$missing" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "Missing Sentry release secrets:$missing"
+            exit 0
+          fi
+
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build hosted app and upload source maps
+        if: ${{ steps.sentry.outputs.configured == 'true' }}
+        run: npm run build:hosted
+
+      - name: Explain skipped upload
+        if: ${{ steps.sentry.outputs.configured != 'true' }}
+        run: |
+          echo "Sentry release upload skipped because one or more Sentry secrets are not configured."

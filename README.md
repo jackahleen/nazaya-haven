@@ -111,6 +111,14 @@ sponsor-provided `SIMULAR_DEMO_COMMAND` secret, or run the Agent-S CLI when
 Agent-S can control a GUI and may execute local commands when local environment
 mode is enabled. Use it only in trusted, disposable environments.
 
+## Sentry Release Workflow
+
+The `Sentry Release` workflow builds the hosted app and uploads source maps only
+when `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, and
+`SENTRY_PROJECT` are configured in GitHub Actions secrets. Static Pages builds
+remain valid without these variables; the client SDK initializes only when a
+public DSN exists and strips email/phone values before sending events.
+
 ## Deployment Architecture
 
 Nazaya Haven uses a **dual-deploy model** to balance static hosting (GitHub Pages)
@@ -265,6 +273,8 @@ never receives secrets; Vercel and GitHub Actions do.
 | `UPSTASH_REDIS_REST_TOKEN` | Vercel | Serverless Redis auth token | Upstash |
 | `DEEPGRAM_API_KEY` | Vercel | Voice intake and transcript tokens (token endpoint) | Deepgram |
 | `SENTRY_AUTH_TOKEN` | GA CI | Upload source maps and annotate releases | Sentry |
+| `SENTRY_ORG` | GA CI | Sentry organization slug for source-map upload | Sentry |
+| `SENTRY_PROJECT` | GA CI | Sentry project slug for source-map upload | Sentry |
 | `AGENTVERSE_API_TOKEN` | Vercel | Fetch.ai Agentverse token for agent orchestration | Fetch.ai |
 | `UAGENTS_WORKER_ENDPOINT` | Vercel | Fetch.ai worker endpoint URL | Fetch.ai |
 | `CONDUCTOR_SERVER_URL` | Vercel | Orkes Conductor server URL | Orkes |

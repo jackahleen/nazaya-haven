@@ -58,16 +58,21 @@ export const integrationProviders = [
     id: "sentry",
     name: "Sentry",
     category: "observability",
-    readiness: "account-needed",
+    readiness: "service-needed",
     directConsumer: true,
     plaiAdapterStatus: "PLAI adapter queued",
     appUse:
-      "Capture frontend errors, release evidence, and session replay for caregiver flows.",
+      "Capture frontend errors, release evidence, and caregiver-flow failures while Sentry hooks strip PII before events leave the app.",
     ciUse:
-      "Upload source maps and annotate releases after a Sentry project DSN is available.",
+      "Upload source maps and annotate releases when SENTRY_AUTH_TOKEN, SENTRY_ORG, and SENTRY_PROJECT are configured.",
     nextStep:
-      "Create the Sentry project and add DSN/auth-token secrets before enabling upload.",
-    requiredSecretNames: ["NEXT_PUBLIC_SENTRY_DSN", "SENTRY_AUTH_TOKEN"],
+      "Create the Sentry project and add DSN, org, project, and auth-token secrets before enabling hosted error capture.",
+    requiredSecretNames: [
+      "NEXT_PUBLIC_SENTRY_DSN",
+      "SENTRY_AUTH_TOKEN",
+      "SENTRY_ORG",
+      "SENTRY_PROJECT",
+    ],
     runtimeSurfaces: ["static-preview", "github-actions", "hosted-next-runtime"],
   },
   {
