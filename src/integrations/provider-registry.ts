@@ -94,11 +94,11 @@ export const integrationProviders = [
     directConsumer: true,
     plaiAdapterStatus: "PLAI adapter queued",
     appUse:
-      "Coordinate resource-routing agents that can accept typed handoffs from Nazaya Haven via the dispatch contracts.",
+      "Coordinate resource-routing agents that can accept typed handoffs from Nazaya Haven via the dispatch contracts. Resource lane includes a demo dispatch button (POST /api/agent/dispatch).",
     ciUse:
       "Validate contract fixtures before running any external agent process.",
     nextStep:
-      "Stand up a uAgents worker on Agentverse and point UAGENTS_WORKER_ENDPOINT at it.",
+      "Stand up a uAgents worker on Agentverse, point UAGENTS_WORKER_ENDPOINT at it, and wire AGENTVERSE_API_TOKEN on Vercel. Demo dispatch gracefully degrades on static preview.",
     requiredSecretNames: ["AGENTVERSE_API_TOKEN"],
     runtimeSurfaces: ["hosted-next-runtime"],
   },
