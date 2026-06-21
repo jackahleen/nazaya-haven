@@ -101,7 +101,6 @@ const zipToCountyMap: Record<string, string> = {
   "95035": "Alameda",
 
   // Contra Costa County
-  "94501": "Contra Costa",
   "94510": "Contra Costa",
   "94511": "Contra Costa",
   "94514": "Contra Costa",
