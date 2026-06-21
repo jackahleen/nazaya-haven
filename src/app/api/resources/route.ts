@@ -3,7 +3,7 @@ import { cacheKey } from "@/lib/cache/cache-keys";
 import { writeJsonCache } from "@/lib/cache/json-cache";
 import { getCachedResources } from "@/lib/resources/free-source-cache";
 import { rerankResources } from "@/integrations/contextual-ai/client";
-import type { CommunityResourceCategory, CommunityResourceResults } from "@/data/community-resources";
+import type { CommunityResourceCategory, CommunityResourceResults, CommunityResource } from "@/data/community-resources";
 
 const VALID_CATEGORIES = [
   "housing",
@@ -190,23 +190,40 @@ If a field is unknown, use an empty string. Only include real organizations foun
         .map((cat: string) => CATEGORY_LABELS[cat as Category])
         .join(", ");
 
+      // Helper to convert CommunityResource to rerank input type
+      const toRerankInput = (r: CommunityResource) => ({
+        name: r.name,
+        description: r.description,
+        phone: r.phone,
+        website: r.website,
+        address: r.address || "",
+      });
+
+      // Helper to convert rerank output back to CommunityResource
+      const toCommunityResource = (r: ReturnType<typeof toRerankInput>): CommunityResource => ({
+        ...r,
+        counties: [] as readonly string[],
+      });
+
       // Re-rank each category array
-      for (const category of Object.keys(merged)) {
-        if (category === "national" || !Array.isArray(merged[category])) {
-          continue;
-        }
-        const resources = merged[category];
-        if (resources.length > 0) {
-          merged[category] = await rerankResources(resources, needDescription);
+      for (const category of selected) {
+        const resources = merged[category as CommunityResourceCategory];
+        if (Array.isArray(resources) && resources.length > 0) {
+          const reranked = await rerankResources(
+            resources.map(toRerankInput),
+            needDescription,
+          );
+          merged[category as CommunityResourceCategory] = reranked.map(toCommunityResource);
         }
       }
 
       // Re-rank national resources with a generic query
       if (Array.isArray(merged.national) && merged.national.length > 0) {
-        merged.national = await rerankResources(
-          merged.national,
+        const reranked = await rerankResources(
+          merged.national.map(toRerankInput),
           "family support and parenting resources",
         );
+        merged.national = reranked.map(toCommunityResource);
       }
     }
 
