@@ -1,4 +1,5 @@
 import { DocumentVaultPreview } from "@/components/documents/DocumentVaultPreview";
+import { NotificationWorkflowPreview } from "@/components/workflows/NotificationWorkflowPreview";
 import { PageShell } from "@/components/PageShell";
 
 export default function DocumentsPage() {
@@ -11,6 +12,7 @@ export default function DocumentsPage() {
         Organize family documents, understand court form options, and prepare for guided form support.
       </p>
       <DocumentVaultPreview />
+      <NotificationWorkflowPreview />
     </PageShell>
   );
 }

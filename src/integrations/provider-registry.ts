@@ -114,7 +114,7 @@ export const integrationProviders = [
     ciUse:
       "Validate workflow definitions before posting to Orkes when credentials exist.",
     nextStep:
-      "Draft the caregiver notification workflow around agent task completion, then provide CONDUCTOR_SERVER_URL and a short-lived CONDUCTOR_AUTH_TOKEN.",
+      "Try /documents to see the caregiver notification workflow stages demo; then post your workflow definition to Orkes Conductor and provide CONDUCTOR_SERVER_URL and CONDUCTOR_AUTH_TOKEN for live execution.",
     requiredSecretNames: ["CONDUCTOR_SERVER_URL", "CONDUCTOR_AUTH_TOKEN"],
     runtimeSurfaces: ["hosted-next-runtime"],
   },
