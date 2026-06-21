@@ -1,4 +1,4 @@
-.PHONY: help install dev typecheck lint build build-hosted preview test verify deploy-vercel deploy-vercel-prod clean
+.PHONY: help install dev typecheck lint build build-static build-hosted preview test test-static test-static-chromium test-runtime test-browserbase verify verify-pages verify-static verify-hosted verify-deploy deploy-vercel deploy-vercel-preview deploy-vercel-prod clean
 
 # Default target: show help
 help:
@@ -12,15 +12,24 @@ help:
 	@echo ""
 	@echo "Building:"
 	@echo "  make build            Build static export (GitHub Pages)"
+	@echo "  make build-static     Build static export (GitHub Pages)"
 	@echo "  make build-hosted     Build with NAZAYA_RUNTIME=hosted (Vercel)"
 	@echo "  make preview          Serve static export locally"
 	@echo ""
 	@echo "Testing:"
-	@echo "  make test             Run e2e tests (Playwright)"
+	@echo "  make test             Run static e2e tests (Playwright)"
+	@echo "  make test-static      Run static e2e tests (Playwright)"
+	@echo "  make test-runtime     Run focused static/runtime fallback tests"
+	@echo "  make test-browserbase Run Browserbase cloud smoke lane"
 	@echo "  make verify           Run typecheck + lint + build + test"
+	@echo "  make verify-pages     Run typecheck + lint + static Pages build"
+	@echo "  make verify-static    Run verify-pages + static e2e tests"
+	@echo "  make verify-hosted    Run typecheck + lint + hosted build"
+	@echo "  make verify-deploy    Run static, hosted, and Browserbase lanes"
 	@echo ""
 	@echo "Deployment:"
 	@echo "  make deploy-vercel    Deploy to Vercel preview/staging"
+	@echo "  make deploy-vercel-preview Alias for deploy-vercel"
 	@echo "  make deploy-vercel-prod Deploy to Vercel production"
 	@echo ""
 	@echo "Cleanup:"
@@ -43,27 +52,55 @@ lint:
 	npm run lint
 
 # Build static export (default for GitHub Pages)
-build:
-	npm run build
+build: build-static
+
+build-static:
+	npm run build:static
 
 # Build with hosted runtime (Vercel)
 build-hosted:
-	NAZAYA_RUNTIME=hosted npm run build
+	npm run build:hosted
 
 # Serve static export locally (tests Pages deployment)
 preview:
 	npm run serve:static
 
 # Run e2e tests
-test:
-	npm run test:e2e
+test: test-static
+
+test-static:
+	npm run test:static
+
+test-static-chromium:
+	npm run test:static:chromium
+
+test-runtime:
+	npm run test:runtime
+
+test-browserbase:
+	npm run test:browserbase
 
 # Verify: typecheck + lint + build + test
-verify: typecheck lint build test
+verify:
+	npm run verify
+
+verify-pages:
+	npm run verify:pages
+
+verify-static:
+	npm run verify:static
+
+verify-hosted:
+	npm run verify:hosted
+
+verify-deploy:
+	npm run verify:deploy
 
 # Deploy to Vercel (preview/staging)
 deploy-vercel:
 	vercel deploy
+
+deploy-vercel-preview: deploy-vercel
 
 # Deploy to Vercel production
 deploy-vercel-prod:

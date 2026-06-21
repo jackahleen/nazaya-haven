@@ -4,13 +4,23 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "npm run build:static",
+    "build:static": "next build",
+    "build:hosted": "node tools/build-hosted.mjs",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "serve:static": "serve out -l tcp://127.0.0.1:3000",
-    "test:e2e": "playwright test",
-    "test:browserbase": "playwright test --config=playwright.config.browserbase.ts"
+    "test:e2e": "npm run test:static",
+    "test:static": "playwright test",
+    "test:static:chromium": "playwright test --project=chromium",
+    "test:runtime": "playwright test tests/e2e/static-runtime.spec.ts tests/e2e/review-fixes.spec.ts tests/e2e/phone-links.spec.ts --project=chromium",
+    "test:browserbase": "playwright test --config=playwright.config.browserbase.ts",
+    "verify": "npm run verify:deploy",
+    "verify:pages": "npm run typecheck && npm run lint && npm run build:static",
+    "verify:static": "npm run verify:pages && npm run test:static",
+    "verify:hosted": "npm run typecheck && npm run lint && npm run build:hosted",
+    "verify:deploy": "npm run verify:static && npm run build:hosted && npm run test:browserbase"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",

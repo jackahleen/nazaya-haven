@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { getDemoNazayaChatResponse } from "@/lib/ai/demo-chat";
 import { nazayaQuickActions } from "@/lib/ai/quick-actions";
-import { routeNazayaIntent } from "@/lib/ai/intent-router";
+import { isStaticNazayaRuntime } from "@/lib/runtime/nazaya-runtime";
 
 type Message = {
   role: "user" | "assistant";
@@ -14,39 +15,20 @@ export function NazayaChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  // Graceful degradation for static preview (no API availability)
-  const [isHostedAvailable, setIsHostedAvailable] = useState<boolean | null>(
-    null
-  );
+  const isDemoMode = isStaticNazayaRuntime();
 
   const handleSend = async (text: string) => {
     if (!text.trim()) return;
 
-    const intent = routeNazayaIntent(text);
+    const userMessage: Message = { role: "user", content: text };
 
-    // Try to detect if /api/chat is available
-    if (isHostedAvailable === null) {
-      try {
-        const testResponse = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: [] }),
-        });
-        setIsHostedAvailable(testResponse.ok || testResponse.status !== 404);
-      } catch {
-        setIsHostedAvailable(false);
-      }
-    }
-
-    if (!isHostedAvailable) {
-      // Static preview mode
+    if (isDemoMode) {
       setMessages((prev) => [
         ...prev,
-        { role: "user", content: text },
+        userMessage,
         {
           role: "assistant",
-          content: `Preview mode: This message would route to intent "${intent}" on the hosted runtime. Deploy to Vercel to enable live Claude responses.`,
+          content: getDemoNazayaChatResponse(text),
         },
       ]);
       setDraft("");
@@ -61,7 +43,7 @@ export function NazayaChat() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [...messages, { role: "user", content: text }],
+          messages: [...messages, userMessage],
         }),
       });
 
@@ -79,7 +61,7 @@ export function NazayaChat() {
 
       setMessages((prev) => [
         ...prev,
-        { role: "user", content: text },
+        userMessage,
         { role: "assistant", content: assistantContent },
       ]);
       setDraft("");
@@ -99,13 +81,20 @@ export function NazayaChat() {
 
   return (
     <section className="mb-8 rounded-3xl border border-lavender-deep/40 bg-cream p-5 sm:p-6">
-      <p className="text-sm font-medium uppercase tracking-wider text-purple-soft">
-        Central assistant
-      </p>
+      <div className="flex flex-wrap items-center gap-3">
+        <p className="text-sm font-medium uppercase tracking-wider text-purple-soft">
+          Central assistant
+        </p>
+        {isDemoMode && (
+          <span className="rounded-full border border-purple/20 bg-pastel-butter/70 px-3 py-1 text-xs font-semibold text-purple-deep">
+            Demo mode
+          </span>
+        )}
+      </div>
       <h2 className="mt-1 text-2xl font-semibold text-ink">Nazaya AI</h2>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">
         Ask for resources, legal form navigation, grounding support, or digital
-        parenting help. Static preview mode shows guided prompts; hosted runtime
+        parenting help. Demo mode shows guided sample responses; hosted runtime
         connects these prompts to Claude.
       </p>
 
@@ -184,10 +173,10 @@ export function NazayaChat() {
       </button>
 
       {/* Static Preview Note */}
-      {isHostedAvailable === false && (
+      {isDemoMode && (
         <p className="mt-3 text-xs text-ink-muted">
-          Preview mode: Chat is unavailable on static GitHub Pages. Deploy to
-          Vercel to enable live Claude responses.
+          Demo mode: Chat uses canned sample responses on static GitHub Pages.
+          The hosted Nazaya runtime enables live Claude responses.
         </p>
       )}
     </section>

@@ -14,9 +14,7 @@ test("home page presents the Ddoski's World support story", async ({ page }) => 
 test("login page can route into the dashboard mock", async ({ page }) => {
   await page.goto("/login/");
 
-  await page.getByLabel("Email").fill("caregiver@example.org");
-  await page.getByLabel("Password").fill("demo-password");
-  await page.getByRole("button", { name: "Sign In" }).click();
+  await page.getByRole("button", { name: "Enter demo" }).click();
 
   await expect(page).toHaveURL(/\/dashboard\/?$/);
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
@@ -35,7 +33,9 @@ test("dashboard exposes the core support areas", async ({ page }) => {
   await expect(page.getByText("Community Feed")).toBeVisible();
   await expect(page.getByText("Support Groups")).toBeVisible();
   await expect(page.getByText("Resources Near You")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Nazaya AI" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Nazaya AI" }).first(),
+  ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Digital Parenting Guide" }),
   ).toBeVisible();
@@ -64,7 +64,7 @@ test("resources page returns static preview results without an API server", asyn
 
   await expect(page.getByRole("heading", { name: "Housing" })).toBeVisible();
   await expect(page.getByText("Compass Family Services")).toBeVisible();
-  await expect(page.getByText("Static preview result: using")).toBeVisible();
+  await expect(page.getByText("Demo mode: using")).toBeVisible();
 });
 
 test("core routes use the consolidated Nazaya shell", async ({ page }) => {
@@ -84,4 +84,14 @@ test("integration readiness surfaces Redis as app infrastructure", async ({
   await expect(page.getByRole("heading", { name: "Redis" })).toBeVisible();
   await expect(page.getByText("Direct app consumer").last()).toBeVisible();
   await expect(page.getByText("PLAI adapter excluded")).toBeVisible();
+});
+
+test("documents lane shows form guidance and disclaimer", async ({ page }) => {
+  await page.goto("/documents/");
+
+  await expect(page.getByRole("heading", { name: /Documents & Forms/i })).toBeVisible();
+  await expect(page.getByText("DV-100")).toBeVisible();
+  await expect(page.getByText("DV-109")).toBeVisible();
+  await expect(page.getByText("DV-110")).toBeVisible();
+  await expect(page.getByText("Nazaya Haven provides legal information, not legal advice")).toBeVisible();
 });

@@ -51,6 +51,9 @@ Open `http://localhost:3000`.
 
 ## Checks
 
+Use npm scripts on every platform, including Windows. The Makefile mirrors these
+commands for macOS/Linux and CI convenience.
+
 Run typecheck:
 
 ```bash
@@ -73,6 +76,17 @@ Run route smoke tests:
 
 ```bash
 npm run test:e2e
+```
+
+Run aggregate lanes:
+
+```bash
+npm run verify:pages      # typecheck + lint + static GitHub Pages build
+npm run verify:static     # verify:pages + local static Playwright suite
+npm run verify:hosted     # typecheck + lint + hosted/Vercel build
+npm run verify:deploy     # static suite + hosted build + Browserbase lane
+npm run test:runtime      # focused static fallback/demo-mode checks
+npm run test:browserbase  # cloud smoke lane; skips locally without credentials
 ```
 
 ## GitHub Pages
@@ -117,13 +131,21 @@ with hosted services (Vercel):
 | Vercel Hosted | Node.js | Yes (env vars) | /api/*, full App Router, middleware |
 
 The `next.config.ts` automatically disables static export on Vercel by checking
-`process.env.VERCEL` and `process.env.NAZAYA_RUNTIME`. This allows `/api/*` routes
-(chat, voice tokens, agent dispatch) and server-held secrets (ANTHROPIC_API_KEY,
-DEEPGRAM_API_KEY, etc.) to run securely on Vercel while the static Pages export
-omits them entirely.
+`process.env.VERCEL`, `process.env.NODE_ENV`, and `process.env.NAZAYA_RUNTIME`.
+This allows `/api/*` routes (chat, voice tokens, agent dispatch) and server-held
+secrets (ANTHROPIC_API_KEY, DEEPGRAM_API_KEY, etc.) to run securely on Vercel
+and under `npm run dev` while the static Pages export omits them entirely.
 
 **Client sees only** `NEXT_PUBLIC_*` variables (e.g., `NEXT_PUBLIC_SENTRY_DSN`,
-`NEXT_PUBLIC_BASE_PATH`).
+`NEXT_PUBLIC_BASE_PATH`). The config derives `NEXT_PUBLIC_NAZAYA_RUNTIME` as
+`static` for GitHub Pages exports and `hosted` for local dev, Vercel, or
+`NAZAYA_RUNTIME=hosted` builds.
+
+**Demo mode:** When `NEXT_PUBLIC_NAZAYA_RUNTIME=static`, the UI does not call
+`/api/chat` or `/api/resources`. Nazaya AI returns canned walkthrough responses,
+resource search uses the built-in Bay Area sample directory, and both surfaces
+show a subtle "Demo mode" badge. Hosted/dev runtime keeps the live API behavior
+and reports live API errors instead of falling back silently.
 
 ## Reproducing & Redeploying
 
@@ -148,14 +170,15 @@ npm run serve:static
 ```
 
 This produces the exact artifact that GitHub Pages will host. Open
-`http://localhost:3000` (no server routes).
+`http://localhost:3000` (no server routes). Chat and resource search run in
+demo mode for this preview.
 
 ### Local Hosted Build (Vercel Runtime)
 
 Test the full App Router and API routes locally:
 
 ```bash
-NAZAYA_RUNTIME=hosted npm run build
+npm run build:hosted
 npm start
 ```
 
@@ -211,12 +234,19 @@ All deployment workflows are available as Makefile targets:
 make help              # Show all targets
 make dev              # Start dev server with --turbopack
 make build            # Build static export (GitHub Pages)
+make build-static     # Build static export (GitHub Pages)
 make build-hosted     # Build with NAZAYA_RUNTIME=hosted (Vercel)
 make preview          # Serve the static export locally
 make typecheck        # Run tsc --noEmit
 make lint             # Run eslint .
-make test             # Run e2e tests (Playwright)
-make verify           # Run typecheck + lint + build + test
+make test             # Run static e2e tests (Playwright)
+make test-runtime     # Run focused static fallback/demo-mode checks
+make test-browserbase # Run Browserbase lane
+make verify-pages     # Run typecheck + lint + static Pages build
+make verify-static    # Run verify-pages + local static Playwright suite
+make verify-hosted    # Run typecheck + lint + hosted/Vercel build
+make verify-deploy    # Run static, hosted, and Browserbase lanes
+make verify           # Alias for verify-deploy
 make deploy-vercel    # Push to Vercel staging
 make deploy-vercel-prod # Push to Vercel production
 make clean            # Remove build artifacts
@@ -241,6 +271,7 @@ never receives secrets; Vercel and GitHub Actions do.
 | `CONDUCTOR_AUTH_TOKEN` | Vercel | Orkes auth token | Orkes |
 | `NEXT_PUBLIC_SENTRY_DSN` | All (public) | Sentry frontend DSN (safe to expose) | Sentry |
 | `NEXT_PUBLIC_BASE_PATH` | Pages (public) | GitHub Pages base path (e.g., `/nazaya-haven`) | GitHub Pages |
+| `NEXT_PUBLIC_NAZAYA_RUNTIME` | All (public, derived) | Client runtime hint: `static` enables demo mode, `hosted` uses live APIs | Local config |
 | `BROWSERBASE_API_KEY` | GA CI | Cloud browser automation and testing | Browserbase |
 | `BROWSERBASE_PROJECT_ID` | GA CI | Browserbase project ID (optional; SDK can infer) | Browserbase |
 | `OPENAI_API_KEY` | GA CI | Demo video and Agent-S grounding (CI only) | OpenAI |

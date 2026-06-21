@@ -6,10 +6,7 @@ import {
   type CommunityResourceCategory,
   type CommunityResourceResults,
 } from "@/data/community-resources";
-import { PageShell } from "@/components/PageShell";
-import { SectionHeader } from "@/components/ui/SectionHeader";
 import { StatusPill } from "@/components/ui/StatusPill";
-import { Surface } from "@/components/ui/Surface";
 import {
   getDemoCommunityResourceResults,
   resourceDemoModeNotice,
@@ -33,7 +30,7 @@ const CATEGORY_LABELS: Record<CommunityResourceCategory | "national", string> = 
   national: "National Resources",
 };
 
-export default function ResourcesPage() {
+export function ResourceSearchPanel() {
   const [zip, setZip] = useState("");
   const [selected, setSelected] = useState<CommunityResourceCategory[]>([]);
   const [loading, setLoading] = useState(false);
@@ -99,15 +96,7 @@ export default function ResourcesPage() {
   }
 
   return (
-    <PageShell maxWidth="full">
-      <Surface className="bg-lavender-light">
-        <SectionHeader
-          eyebrow="Resources"
-          title="Resources Near You"
-          description="Tell us what you need help with and your zip code, and we'll find local and national resources for you."
-        />
-      </Surface>
-
+    <>
       <form onSubmit={handleSearch} className="mt-8 max-w-2xl space-y-6">
         <div className="flex flex-wrap gap-2">
           {isDemoMode && <StatusPill tone="butter">Demo mode</StatusPill>}
@@ -190,7 +179,7 @@ export default function ResourcesPage() {
           )}
         </div>
       )}
-    </PageShell>
+    </>
   );
 }
 

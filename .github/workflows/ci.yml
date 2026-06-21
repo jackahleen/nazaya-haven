@@ -33,14 +33,5 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Build static app
-        run: npm run build
-
-      - name: Smoke test static routes
-        run: npm run test:e2e
+      - name: Verify static app
+        run: npm run verify:static

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NazayaChat } from "@/components/chat/NazayaChat";
 import { AuthenticatedUserSummary } from "@/components/dashboard/AuthenticatedUserSummary";
 import { DigitalParentingGuide } from "@/components/digital-parenting/DigitalParentingGuide";
 import { DashboardCard } from "@/components/DashboardCard";
@@ -42,6 +43,13 @@ const sections = [
     href: "/legal",
   },
   {
+    title: "Documents & Forms",
+    description:
+      "Organize uploads, understand legal form options, and prepare for guided document support.",
+    icon: <IconLegal />,
+    href: "/documents",
+  },
+  {
     title: "Journal",
     description:
       "Private reflections and milestones — a calm space to track your family's journey.",
@@ -78,7 +86,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <Link
-          href="/login"
+          href="/dashboard#account"
           className="inline-flex shrink-0 items-center justify-center rounded-full border border-purple/25 bg-lavender-light px-5 py-2.5 text-sm font-semibold text-purple-deep transition hover:bg-lavender"
         >
           Account
@@ -99,6 +107,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      <NazayaChat />
       <DigitalParentingGuide />
       <IntegrationReadiness />
 

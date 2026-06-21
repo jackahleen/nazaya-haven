@@ -2,7 +2,10 @@ import { demoSession } from "@/data/demo-session";
 
 export function AuthenticatedUserSummary() {
   return (
-    <section className="mb-8 grid gap-4 rounded-3xl bg-lavender-light p-5 sm:p-6 lg:grid-cols-[1.2fr_0.8fr]">
+    <section
+      id="account"
+      className="mb-8 grid gap-4 rounded-3xl bg-lavender-light p-5 sm:p-6 lg:grid-cols-[1.2fr_0.8fr]"
+    >
       <div>
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-sm font-medium uppercase tracking-wider text-purple-soft">

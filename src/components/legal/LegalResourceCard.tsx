@@ -1,6 +1,11 @@
 "use client";
 
-import { type LegalNeedType, legalNeedLabels, type LegalResource } from "@/data/legal-resources";
+import {
+  type LegalNeedType,
+  legalNeedLabels,
+  type LegalResource,
+} from "@/data/legal-resources";
+import { toTelHref } from "@/utils/phone-links";
 
 type LegalResourceCardProps = {
   resource: LegalResource;
@@ -25,9 +30,7 @@ export function LegalResourceCard({ resource, userCounty }: LegalResourceCardPro
   const distanceBadge = getDistanceBadge(resource, userCounty);
 
   const handleCall = () => {
-    // Remove non-numeric characters from phone for tel: link
-    const phoneDigits = resource.phone.replace(/\D/g, "");
-    window.location.href = `tel:+1${phoneDigits}`;
+    window.location.href = toTelHref(resource.phone);
   };
 
   const handleWebsite = () => {

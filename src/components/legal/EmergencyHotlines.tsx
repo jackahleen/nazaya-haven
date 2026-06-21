@@ -1,5 +1,7 @@
 "use client";
 
+import { toTelHref } from "@/utils/phone-links";
+
 const emergencyNumbers = [
   {
     id: "911",
@@ -37,8 +39,7 @@ const emergencyNumbers = [
 
 export function EmergencyHotlines() {
   const handleCall = (number: string) => {
-    const phoneDigits = number.replace(/\D/g, "");
-    window.location.href = `tel:+1${phoneDigits}`;
+    window.location.href = toTelHref(number);
   };
 
   return (
