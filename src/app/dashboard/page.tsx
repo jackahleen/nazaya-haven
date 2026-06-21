@@ -8,6 +8,7 @@ import {
   IconFeed,
   IconGroups,
   IconJournal,
+  IconLegal,
   IconMap,
   IconTeacher,
 } from "@/components/icons";
@@ -29,13 +30,21 @@ const sections = [
   {
     title: "Resources Near You",
     description:
-      "Discover local services, clinics, legal aid, and community programs on an interactive map.",
+      "Discover local services, clinics, and community programs in your area.",
     icon: <IconMap />,
+    href: "/resources",
+  },
+  {
+    title: "Legal Navigation",
+    description:
+      "Find local legal services for restraining orders, custody, court forms, and family support.",
+    icon: <IconLegal />,
+    href: "/legal",
   },
   {
     title: "Journal",
     description:
-      "Private reflections and milestones — a calm space to track your family’s journey.",
+      "Private reflections and milestones — a calm space to track your family's journey.",
     icon: <IconJournal />,
   },
   {
@@ -85,6 +94,7 @@ export default function DashboardPage() {
             title={section.title}
             description={section.description}
             icon={section.icon}
+            href={"href" in section ? section.href : undefined}
           />
         ))}
       </div>
