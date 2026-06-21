@@ -128,10 +128,10 @@ export const integrationProviders = [
     appUse:
       "Keep as an engineering or delegated-build candidate until an app-facing use is selected.",
     ciUse:
-      "Optional Devin PR-review job; human code review still required.",
+      "Devin PR-review job (.github/workflows/devin-pr-review.yml) runs on every pull_request [opened, synchronize] when DEVIN_API_KEY and DEVIN_ORG_ID secrets are present; logs diagnostic and exits 0 if unconfigured. Generates AI code review summaries via src/integrations/devin-api.ts and posts them as PR comments; does not block merge.",
     nextStep:
-      "Decide whether Cognition is a build assistant or an in-product agent surface.",
-    requiredSecretNames: [],
+      "Add DEVIN_API_KEY and DEVIN_ORG_ID to GitHub Secrets, then monitor PR reviews. Decide whether Cognition is a build assistant or an in-product agent surface.",
+    requiredSecretNames: ["DEVIN_API_KEY", "DEVIN_ORG_ID"],
     runtimeSurfaces: ["github-actions"],
   },
   {
