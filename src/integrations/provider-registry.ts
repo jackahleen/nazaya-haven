@@ -78,11 +78,11 @@ export const integrationProviders = [
     directConsumer: true,
     plaiAdapterStatus: "PLAI adapter queued",
     appUse:
-      "Caregiver voice intake and transcript capture through a hosted short-lived token endpoint; static preview falls back to typed input. VoiceIntakeWidget (src/components/voice/VoiceIntakeWidget.tsx) provides real-time transcription using Web Speech API in demo, upgrades to Deepgram streaming on hosted.",
+      "Real-time voice intake with three-tier fallback: (1) Deepgram live WebSocket streaming on hosted runtime via /api/voice/deepgram/token short-lived tokens (2) Web Speech API browser fallback with interim + final transcripts (3) typed textarea for static preview. Intent routing maps voice to resource paths (Find resources / Legal forms / Grounding / Digital parenting). Bilingual support (English/Español). Spoken replies via SpeechSynthesis. Live recording levels and privacy-first design.",
     ciUse:
-      "Keep static preview mocked; real tokens need a hosted endpoint or worker.",
+      "Static tests verify tier badges (\"Deepgram live\" / \"Browser speech\" / \"Type\"), intent chips, language toggle, and privacy notices. Hosted tests require Deepgram token endpoint availability.",
     nextStep:
-      "Wire src/app/api/voice/deepgram/token to mint short-lived tokens once DEEPGRAM_API_KEY is set on Vercel. Update VoiceIntakeWidget to fetch tokens from /api/voice/deepgram/token and stream Deepgram transcription for production caregiver flows.",
+      "Set DEEPGRAM_API_KEY on Vercel to mint tokens; token route at /api/voice/deepgram/token already streams audio via native WebSocket (nova-2 model). Wire voice widget deeper into dashboard and resources lane for prominent caregiver entry point.",
     requiredSecretNames: ["DEEPGRAM_API_KEY"],
     runtimeSurfaces: ["hosted-next-runtime"],
   },
@@ -175,9 +175,9 @@ export const demoAgentTasks = [
     id: "deepgram-voice-intake",
     kind: "voice-session",
     providerId: "deepgram",
-    label: "Voice intake for caregiver resource needs",
-    targetRoute: "/dashboard/",
-    status: "blocked",
+    label: "Live voice intake with intent routing and bilingual support",
+    targetRoute: "/resources/",
+    status: "running",
   },
 ] as const satisfies readonly AgentTask[];
 
