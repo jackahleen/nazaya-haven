@@ -29,4 +29,8 @@ test("dashboard exposes the core support areas", async ({ page }) => {
   await expect(page.getByText("Support Groups")).toBeVisible();
   await expect(page.getByText("Resources Near You")).toBeVisible();
   await expect(page.getByText("Nazaya AI")).toBeVisible();
+  await expect(page.getByText("Digital Parenting Guide")).toBeVisible();
+  await expect(page.getByText("Show me around Nazaya Haven")).toBeVisible();
+  await expect(page.getByText("Agent-S guided walkthrough")).toBeVisible();
+  await expect(page.getByText("Notify caregiver when ready")).toBeVisible();
 });

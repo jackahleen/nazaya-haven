@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DigitalParentingGuide } from "@/components/digital-parenting/DigitalParentingGuide";
 import { DashboardCard } from "@/components/DashboardCard";
 import {
   IconAI,
@@ -6,6 +7,7 @@ import {
   IconGroups,
   IconJournal,
   IconMap,
+  IconTeacher,
 } from "@/components/icons";
 import { PageShell } from "@/components/PageShell";
 
@@ -39,6 +41,12 @@ const sections = [
     description:
       "Gentle, guided support for questions about advocacy, rights, and next steps — always with care.",
     icon: <IconAI />,
+  },
+  {
+    title: "Digital Parenting Guide",
+    description:
+      "Build adult tech literacy around internet access, privacy settings, screen-time routines, and guided navigation.",
+    icon: <IconTeacher />,
   },
 ] as const;
 
@@ -76,6 +84,8 @@ export default function DashboardPage() {
           />
         ))}
       </div>
+
+      <DigitalParentingGuide />
 
       <p className="mt-10 text-center text-sm text-ink-muted">
         <Link href="/" className="font-medium text-purple hover:text-purple-deep">
