@@ -28,7 +28,7 @@ export function findMatchingResources(
   }
 
   // Filter resources
-  let results = legalResources.filter((resource) => {
+  const results = legalResources.filter((resource) => {
     // Check if resource serves this county or is statewide
     const serveCounty =
       resource.countyServed.includes(county) ||

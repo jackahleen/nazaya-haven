@@ -84,7 +84,7 @@ export function LegalSearch({ onSearch, isLoading = false }: LegalSearchProps) {
           Your ZIP Code
         </label>
         <p className="mt-1 text-xs text-ink-muted">
-          We'll find legal resources in your area.
+          We&apos;ll find legal resources in your area.
         </p>
 
         <div className="mt-3 space-y-2">
