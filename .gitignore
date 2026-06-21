@@ -151,3 +151,7 @@ docs/superpowers/
 docs/integrations/
 docs/*.pdf
 docs/*.png
+
+# Sai demo-video scratch
+_video/
+out/
