@@ -12,13 +12,29 @@ support, and guided next steps.
 2. Show the landing page tagline: "A Safe Place. A Stronger Future. Together."
 3. Use "Explore Resources" or "Get Started" to enter the app.
 4. Sign in with demo credentials.
-5. Show the dashboard cards:
+5. Show the authenticated caregiver preview:
+   - Signed in as Demo Caregiver
+   - Kinship caregiver preview
+   - Guided tasks queued for agent and teammate lanes
+6. Show the dashboard cards:
    - Community Feed
    - Support Groups
    - Resources Near You
    - Journal
    - Nazaya AI
-6. Narrate the next iteration:
+   - Digital Parenting Guide
+7. Show the digital parenting literacy flow:
+   - Adult-facing internet access routines
+   - Platform literacy and privacy support
+   - Guided navigation queue for Agent-S tutorial help
+   - Notification handoffs when agent work is ready
+8. Show the Integration Readiness section:
+   - Simular Agent-S as the demo video and guided walkthrough consumer.
+   - Browserbase as the deployed UI testing and recording consumer.
+   - Sentry as the frontend observability consumer.
+   - Deepgram, Fetch.ai, and Orkes as dynamic-service integrations.
+   - PLAI adapter queued for selected tools, with Redis excluded from PLAI conversion.
+9. Narrate the next iteration:
    - Fetch.ai or Orkes can orchestrate resource-routing workflows.
    - Deepgram can power voice intake and voice assistant flows.
    - Browserbase can run deployed UI smoke checks.
@@ -28,9 +44,12 @@ support, and guided next steps.
 ## Suggested Agent-S Task
 
 Open the Nazaya Haven demo URL, navigate through the landing page, login page,
-and dashboard, and capture a concise walkthrough video that demonstrates how the
-app prepares for a foster-family resource assistant. Do not enter real personal
-information. Use demo credentials only.
+authenticated dashboard preview, Digital Parenting Literacy guide, and
+Integration Readiness section. Capture a concise walkthrough video that
+demonstrates how the app prepares for a foster-family resource assistant, how
+Agent-S can guide adults through the app, and how sponsor tools will plug into
+testing, observability, voice, orchestration, and notifications. Do not enter
+real personal information. Use demo credentials only.
 
 ## Safety Notes
 

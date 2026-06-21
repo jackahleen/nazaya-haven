@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AuthenticatedUserSummary } from "@/components/dashboard/AuthenticatedUserSummary";
 import { DigitalParentingGuide } from "@/components/digital-parenting/DigitalParentingGuide";
 import { DashboardCard } from "@/components/DashboardCard";
+import { IntegrationReadiness } from "@/components/integrations/IntegrationReadiness";
 import {
   IconAI,
   IconFeed,
@@ -89,6 +90,7 @@ export default function DashboardPage() {
       </div>
 
       <DigitalParentingGuide />
+      <IntegrationReadiness />
 
       <p className="mt-10 text-center text-sm text-ink-muted">
         <Link href="/" className="font-medium text-purple hover:text-purple-deep">

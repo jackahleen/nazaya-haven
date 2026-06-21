@@ -37,4 +37,13 @@ test("dashboard exposes the core support areas", async ({ page }) => {
   await expect(page.getByText("Show me around Nazaya Haven")).toBeVisible();
   await expect(page.getByText("Agent-S guided walkthrough")).toBeVisible();
   await expect(page.getByText("Notify caregiver when ready")).toBeVisible();
+  await expect(page.getByText("Integration Readiness")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Simular Agent-S" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Browserbase" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sentry" })).toBeVisible();
+  await expect(page.getByText("PLAI adapter queued").first()).toBeVisible();
 });

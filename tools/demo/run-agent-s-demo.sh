@@ -17,7 +17,7 @@ if [[ -z "$target_url" ]]; then
   fi
 fi
 
-default_task="Open ${target_url}, navigate through the Nazaya Haven landing page, login page, and dashboard, and capture a concise demo-video walkthrough for Hack Berkeley Ddoski World. Use demo credentials only."
+default_task="Open ${target_url}, navigate through the Nazaya Haven landing page, login page, authenticated dashboard preview, Digital Parenting Literacy guide, and Integration Readiness section. Capture a concise demo-video walkthrough for Hack Berkeley Ddoski World that shows how Agent-S can guide adults through the app and how sponsor tools connect to testing, observability, voice, orchestration, notifications, and PLAI adapter handoff. Use demo credentials only."
 task="${AGENT_S_TASK:-$default_task}"
 
 cat > artifacts/demo/demo-brief.md <<EOF

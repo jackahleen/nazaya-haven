@@ -147,3 +147,4 @@ vite.config.ts.timestamp-*
 
 # Local planning docs
 docs/superpowers/
+docs/*.pdf
