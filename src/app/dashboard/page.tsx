@@ -25,15 +25,16 @@ const sections = [
   {
     title: "Resources Near You",
     description:
-      "Discover local services, clinics, legal aid, and community programs on an interactive map.",
+      "Discover local services, clinics, and community programs in your area.",
     icon: <IconMap />,
+    href: "/resources",
   },
-  {
-    title: "Journal",
-    description:
-      "Private reflections and milestones — a calm space to track your family’s journey.",
-    icon: <IconJournal />,
-  },
+{
+  title: "Journal",
+  description:
+    "Private reflections and milestones — a calm space to track your family's journey.",
+  icon: <IconJournal />,
+},
   {
     title: "Nazaya AI",
     description:
@@ -69,11 +70,12 @@ export default function DashboardPage() {
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {sections.map((section) => (
           <DashboardCard
-            key={section.title}
-            title={section.title}
-            description={section.description}
-            icon={section.icon}
-          />
+              key={section.title}
+              title={section.title}
+              description={section.description}
+              icon={section.icon}
+              href={"href" in section ? section.href : undefined}
+            />
         ))}
       </div>
 
