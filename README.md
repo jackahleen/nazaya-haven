@@ -235,7 +235,6 @@ never receives secrets; Vercel and GitHub Actions do.
 | `UPSTASH_REDIS_REST_TOKEN` | Vercel | Serverless Redis auth token | Upstash |
 | `DEEPGRAM_API_KEY` | Vercel | Voice intake and transcript tokens (token endpoint) | Deepgram |
 | `SENTRY_AUTH_TOKEN` | GA CI | Upload source maps and annotate releases | Sentry |
-| `FETCH_AGENT_SEED` | Vercel | Fetch.ai uAgent seed phrase | Fetch.ai |
 | `AGENTVERSE_API_TOKEN` | Vercel | Fetch.ai Agentverse token for agent orchestration | Fetch.ai |
 | `UAGENTS_WORKER_ENDPOINT` | Vercel | Fetch.ai worker endpoint URL | Fetch.ai |
 | `CONDUCTOR_SERVER_URL` | Vercel | Orkes Conductor server URL | Orkes |
