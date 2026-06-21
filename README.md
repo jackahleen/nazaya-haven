@@ -97,6 +97,172 @@ sponsor-provided `SIMULAR_DEMO_COMMAND` secret, or run the Agent-S CLI when
 Agent-S can control a GUI and may execute local commands when local environment
 mode is enabled. Use it only in trusted, disposable environments.
 
+## Deployment Architecture
+
+Nazaya Haven uses a **dual-deploy model** to balance static hosting (GitHub Pages)
+with hosted services (Vercel):
+
+- **Static Preview (GitHub Pages)**: Fully static export (`next.config.ts` output: "export")
+  built from `main` and served over Pages. No server secrets, no API routes.
+- **Hosted Runtime (Vercel)**: Dynamic Next.js App Router with full API support, server
+  secrets, and session management. Auto-enabled when `VERCEL=1` (set by Vercel) or
+  `NAZAYA_RUNTIME=hosted` (for local testing).
+
+**The Split:**
+
+| Surface | Runs | Holds Secrets | Routes |
+| --- | --- | --- | --- |
+| Static Pages | Pages CDN | No | Pages, public client code only |
+| GitHub Actions CI | Runners | Yes (secrets.X) | Validation, smoke tests, uploads |
+| Vercel Hosted | Node.js | Yes (env vars) | /api/*, full App Router, middleware |
+
+The `next.config.ts` automatically disables static export on Vercel by checking
+`process.env.VERCEL` and `process.env.NAZAYA_RUNTIME`. This allows `/api/*` routes
+(chat, voice tokens, agent dispatch) and server-held secrets (ANTHROPIC_API_KEY,
+DEEPGRAM_API_KEY, etc.) to run securely on Vercel while the static Pages export
+omits them entirely.
+
+**Client sees only** `NEXT_PUBLIC_*` variables (e.g., `NEXT_PUBLIC_SENTRY_DSN`,
+`NEXT_PUBLIC_BASE_PATH`).
+
+## Reproducing & Redeploying
+
+### Local Development
+
+Install and start the dev server:
+
+```bash
+npm ci
+npm run dev
+```
+
+Open `http://localhost:3000`.
+
+### Local Static Preview (GitHub Pages Export)
+
+Build the static export and serve it locally:
+
+```bash
+npm run build
+npm run serve:static
+```
+
+This produces the exact artifact that GitHub Pages will host. Open
+`http://localhost:3000` (no server routes).
+
+### Local Hosted Build (Vercel Runtime)
+
+Test the full App Router and API routes locally:
+
+```bash
+NAZAYA_RUNTIME=hosted npm run build
+npm start
+```
+
+This disables `output: "export"` and enables `/api/*` routes. Server secrets
+must be in `.env.local` (never committed).
+
+### Deploy via Git Integration (GitHub Pages)
+
+Push to `main`:
+
+```bash
+git add .
+git commit -m "..."
+git push origin main
+```
+
+The `pages.yml` workflow automatically builds and publishes to GitHub Pages.
+For repository Pages, `NEXT_PUBLIC_BASE_PATH` is set to the repo name.
+
+### Deploy via Vercel CLI
+
+Link the project (one time):
+
+```bash
+vercel link
+vercel pull
+```
+
+Deploy a preview:
+
+```bash
+vercel deploy
+```
+
+Deploy to production:
+
+```bash
+vercel --prod
+```
+
+Or use the Makefile:
+
+```bash
+make deploy-vercel          # Build and deploy to Vercel staging
+make deploy-vercel-preview  # Deploy a preview environment
+```
+
+### Using the Makefile
+
+All deployment workflows are available as Makefile targets:
+
+```bash
+make help              # Show all targets
+make dev              # Start dev server with --turbopack
+make build            # Build static export (GitHub Pages)
+make build-hosted     # Build with NAZAYA_RUNTIME=hosted (Vercel)
+make preview          # Serve the static export locally
+make typecheck        # Run tsc --noEmit
+make lint             # Run eslint .
+make test             # Run e2e tests (Playwright)
+make verify           # Run typecheck + lint + build + test
+make deploy-vercel    # Push to Vercel staging
+make deploy-vercel-prod # Push to Vercel production
+make clean            # Remove build artifacts
+```
+
+## Environment Variables
+
+Every environment variable is grouped by its deployment surface. Static Pages
+never receives secrets; Vercel and GitHub Actions do.
+
+| Var | Surface | Purpose | Provider |
+| --- | --- | --- | --- |
+| `ANTHROPIC_API_KEY` | Vercel, GA CI | Claude API key for chat, search, document guidance | Anthropic |
+| `REDIS_URL` | Vercel, GA CI | Redis connection for cache and agent trace persistence | Redis |
+| `UPSTASH_REDIS_REST_URL` | Vercel | Serverless Redis REST URL (alternative to REDIS_URL) | Upstash |
+| `UPSTASH_REDIS_REST_TOKEN` | Vercel | Serverless Redis auth token | Upstash |
+| `DEEPGRAM_API_KEY` | Vercel | Voice intake and transcript tokens (token endpoint) | Deepgram |
+| `SENTRY_AUTH_TOKEN` | GA CI | Upload source maps and annotate releases | Sentry |
+| `FETCH_AGENT_SEED` | Vercel | Fetch.ai uAgent seed phrase | Fetch.ai |
+| `AGENTVERSE_API_TOKEN` | Vercel | Fetch.ai Agentverse token for agent orchestration | Fetch.ai |
+| `UAGENTS_WORKER_ENDPOINT` | Vercel | Fetch.ai worker endpoint URL | Fetch.ai |
+| `CONDUCTOR_SERVER_URL` | Vercel | Orkes Conductor server URL | Orkes |
+| `CONDUCTOR_AUTH_TOKEN` | Vercel | Orkes auth token | Orkes |
+| `NEXT_PUBLIC_SENTRY_DSN` | All (public) | Sentry frontend DSN (safe to expose) | Sentry |
+| `NEXT_PUBLIC_BASE_PATH` | Pages (public) | GitHub Pages base path (e.g., `/nazaya-haven`) | GitHub Pages |
+| `BROWSERBASE_API_KEY` | GA CI | Cloud browser automation and testing | Browserbase |
+| `BROWSERBASE_PROJECT_ID` | GA CI | Browserbase project ID (optional; SDK can infer) | Browserbase |
+| `OPENAI_API_KEY` | GA CI | Demo video and Agent-S grounding (CI only) | OpenAI |
+| `HF_TOKEN` | GA CI | Hugging Face token for demo agent grounding | Hugging Face |
+| `AGENT_S_GROUND_URL` | GA CI | Agent-S grounding server URL for demos | Simular Agent-S |
+| `SIMULAR_DEMO_COMMAND` | GA CI | Optional pre-built Simular/Agent-S command override | Simular |
+| `GH_PAGES_DEPLOY_TOKEN` | GA CI | GitHub token for Pages publish (auto via GITHUB_TOKEN) | GitHub |
+| `VERCEL` | Vercel (auto) | Auto-set by Vercel; triggers hosted-runtime mode | Vercel |
+| `NAZAYA_RUNTIME` | Local | Set to `hosted` locally to test Vercel behavior | Local override |
+
+See `.env.example` for all variables with placeholder values and grouping.
+
+**Setting Secrets on Vercel:**
+
+```bash
+vercel env pull          # Pull secrets from Vercel to .env.local
+vercel env add VAR_NAME  # Interactively add a secret
+vercel env rm VAR_NAME   # Remove a secret
+vercel env ls            # List all secrets
+```
+
 ## Sponsor Tool Evaluation
 
 The first tracked evaluation input is
