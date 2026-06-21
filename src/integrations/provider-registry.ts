@@ -78,11 +78,11 @@ export const integrationProviders = [
     directConsumer: true,
     plaiAdapterStatus: "PLAI adapter queued",
     appUse:
-      "Caregiver voice intake and transcript capture through a hosted short-lived token endpoint; static preview falls back to typed input.",
+      "Caregiver voice intake and transcript capture through a hosted short-lived token endpoint; static preview falls back to typed input. VoiceIntakeWidget (src/components/voice/VoiceIntakeWidget.tsx) provides real-time transcription using Web Speech API in demo, upgrades to Deepgram streaming on hosted.",
     ciUse:
       "Keep static preview mocked; real tokens need a hosted endpoint or worker.",
     nextStep:
-      "Wire src/app/api/voice/deepgram/token to mint short-lived tokens once DEEPGRAM_API_KEY is set on Vercel.",
+      "Wire src/app/api/voice/deepgram/token to mint short-lived tokens once DEEPGRAM_API_KEY is set on Vercel. Update VoiceIntakeWidget to fetch tokens from /api/voice/deepgram/token and stream Deepgram transcription for production caregiver flows.",
     requiredSecretNames: ["DEEPGRAM_API_KEY"],
     runtimeSurfaces: ["hosted-next-runtime"],
   },
