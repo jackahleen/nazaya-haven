@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthenticatedUserSummary } from "@/components/dashboard/AuthenticatedUserSummary";
 import { DigitalParentingGuide } from "@/components/digital-parenting/DigitalParentingGuide";
 import { DashboardCard } from "@/components/DashboardCard";
 import {
@@ -73,6 +74,8 @@ export default function DashboardPage() {
           Account
         </Link>
       </div>
+
+      <AuthenticatedUserSummary />
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {sections.map((section) => (

@@ -25,6 +25,10 @@ test("login page can route into the dashboard mock", async ({ page }) => {
 test("dashboard exposes the core support areas", async ({ page }) => {
   await page.goto("/dashboard/");
 
+  await expect(page.getByText("Signed in as")).toBeVisible();
+  await expect(page.getByText("Demo Caregiver")).toBeVisible();
+  await expect(page.getByText("Kinship caregiver preview")).toBeVisible();
+  await expect(page.getByText("3 guided tasks queued")).toBeVisible();
   await expect(page.getByText("Community Feed")).toBeVisible();
   await expect(page.getByText("Support Groups")).toBeVisible();
   await expect(page.getByText("Resources Near You")).toBeVisible();
