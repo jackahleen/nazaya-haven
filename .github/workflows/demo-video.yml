@@ -44,11 +44,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Python
         if: ${{ inputs.run_mode == 'simular' }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -61,7 +61,7 @@ jobs:
         run: tools/demo/run-agent-s-demo.sh
 
       - name: Upload demo artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nazaya-haven-demo-video-artifacts
           path: artifacts/demo
