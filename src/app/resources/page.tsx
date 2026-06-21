@@ -10,6 +10,7 @@ import { PageShell } from "@/components/PageShell";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { Surface } from "@/components/ui/Surface";
+import { ResourceHandoffButton } from "@/components/agents/ResourceHandoffButton";
 import {
   getDemoCommunityResourceResults,
   resourceDemoModeNotice,
@@ -182,7 +183,11 @@ export default function ResourcesPage() {
                 </h2>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   {items.map((r, i) => (
-                    <ResourceCard key={i} resource={r} />
+                    <ResourceCard
+                      key={i}
+                      resource={r}
+                      category={key as CommunityResourceCategory | "national"}
+                    />
                   ))}
                 </div>
               </section>
@@ -194,7 +199,12 @@ export default function ResourcesPage() {
   );
 }
 
-function ResourceCard({ resource }: { resource: CommunityResource }) {
+interface ResourceCardProps {
+  resource: CommunityResource;
+  category: CommunityResourceCategory | "national";
+}
+
+function ResourceCard({ resource, category }: ResourceCardProps) {
   return (
     <article className="rounded-2xl border border-lavender-deep/40 bg-cream-dark/80 p-5">
       <h3 className="font-semibold text-ink">{resource.name}</h3>
@@ -218,6 +228,12 @@ function ResourceCard({ resource }: { resource: CommunityResource }) {
       <p className="mt-2 text-sm font-medium text-purple-deep">
         Booking support available through the resource website
       </p>
+      <div className="mt-4 border-t border-lavender-deep/20 pt-4">
+        <ResourceHandoffButton
+          resourceName={resource.name}
+          category={category}
+        />
+      </div>
     </article>
   );
 }

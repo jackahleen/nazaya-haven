@@ -94,11 +94,11 @@ export const integrationProviders = [
     directConsumer: true,
     plaiAdapterStatus: "PLAI adapter queued",
     appUse:
-      "Coordinate resource-routing agents that can accept typed handoffs from Nazaya Haven via the dispatch contracts.",
+      "Coordinate resource-routing agents through dispatch contracts with live status polling. Dispatch routes can route from resources, documents, or chat lanes. Demo shows deterministic state machine (queued → running → completed) with mock agent reasoning trace and handoff chain. Client can consent to persist traces to Redis.",
     ciUse:
-      "Validate contract fixtures before running any external agent process.",
+      "Validate contract fixtures and in-repo mock agent state machine progression (/api/agent/dispatch/[id]/status).",
     nextStep:
-      "Stand up a uAgents worker on Agentverse and point UAGENTS_WORKER_ENDPOINT at it.",
+      "Stand up a uAgents worker on Agentverse, point UAGENTS_WORKER_ENDPOINT at it, and wire AGENTVERSE_API_TOKEN on Vercel. Trace persistence requires REDIS_URL. Demo dispatch gracefully degrades on static preview using mock-uagent.",
     requiredSecretNames: ["AGENTVERSE_API_TOKEN"],
     runtimeSurfaces: ["hosted-next-runtime"],
   },
