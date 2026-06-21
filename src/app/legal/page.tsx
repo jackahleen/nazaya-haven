@@ -2,256 +2,198 @@
 
 import { useState } from "react";
 import { PageShell } from "@/components/PageShell";
-import { LegalSearch, type SearchParams } from "@/components/legal/LegalSearch";
-import { LegalResources } from "@/components/legal/LegalResources";
-import { EmergencyHotlines } from "@/components/legal/EmergencyHotlines";
-import { SupportWizard, type WizardAnswers } from "@/components/legal/SupportWizard";
-import { findMatchingResources } from "@/utils/findMatchingResources";
-import { zipCodeToCounty } from "@/utils/zipCodeToCounty";
-import { type LegalResource } from "@/data/legal-resources";
 
-const needOptions = [
-  { value: "family-law", label: "Family law help" },
-  { value: "custody", label: "Custody or visitation help" },
+const resources = [
+  {
+    name: "San Francisco Superior Court Self-Help Center",
+    county: "San Francisco",
+    issues: ["family", "custody", "forms", "child-support"],
+    description: "Free help with court forms, custody, visitation, child support, and self-representation.",
+    phone: "(415) 551-5880",
+    website: "https://www.sfsuperiorcourt.org/self-help",
+  },
+  {
+    name: "Bay Area Legal Aid",
+    county: "Bay Area",
+    issues: ["housing", "family", "public-benefits", "general"],
+    description: "Free civil legal help for low-income residents in the Bay Area.",
+    phone: "1-800-551-5554",
+    website: "https://baylegal.org",
+  },
+  {
+    name: "Legal Aid at Work",
+    county: "California",
+    issues: ["employment", "education", "general"],
+    description: "Legal information and clinics for workers, students, and families.",
+    phone: "(415) 864-8848",
+    website: "https://legalaidatwork.org",
+  },
+  {
+    name: "Contra Costa Superior Court Self-Help Center",
+    county: "Contra Costa",
+    issues: ["family", "custody", "forms", "child-support"],
+    description: "Court self-help for family law, custody, child support, and court forms.",
+    phone: "(925) 608-1000",
+    website: "https://www.cc-courts.org/self-help",
+  },
+];
+
+const issueOptions = [
+  { value: "general", label: "General legal aid" },
+  { value: "family", label: "Family law" },
+  { value: "custody", label: "Custody or visitation" },
+  { value: "forms", label: "Court forms" },
+  { value: "child-support", label: "Child support" },
   { value: "housing", label: "Housing legal help" },
   { value: "immigration", label: "Immigration legal help" },
-  { value: "education", label: "Education or school rights help" },
-  { value: "forms", label: "Court forms help" },
-  { value: "general", label: "General legal aid" },
-] as const;
+  { value: "education", label: "Education or school rights" },
+];
+
+function countyFromZip(zip: string) {
+  if (zip.startsWith("941")) return "San Francisco";
+  if (zip.startsWith("945") || zip.startsWith("948")) return "Contra Costa";
+  return "";
+}
 
 export default function LegalNavigationPage() {
-  const [wizardComplete, setWizardComplete] = useState(false);
-  const [wizardAnswers, setWizardAnswers] = useState<WizardAnswers | null>(null);
-  const [searchResults, setSearchResults] = useState<LegalResource[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedCounty, setSelectedCounty] = useState<string>();
+  const [issue, setIssue] = useState("general");
+  const [zip, setZip] = useState("");
+  const county = countyFromZip(zip);
 
-  const handleWizardComplete = (answers: WizardAnswers) => {
-    setWizardAnswers(answers);
-    setWizardComplete(true);
-    // Auto-search with wizard answers
-    handleWizardSearch(answers);
-  };
+  const filteredResources = resources.filter((resource) => {
+    const matchesIssue =
+      resource.issues.includes(issue) || resource.issues.includes("general");
+    const matchesCounty =
+      !county ||
+      resource.county === county ||
+      resource.county === "Bay Area" ||
+      resource.county === "California";
 
-  const handleWizardSearch = (answers: WizardAnswers) => {
-    setIsLoading(true);
-
-    setTimeout(() => {
-      const results = findMatchingResources({
-        zipCode: answers.zipCode,
-        needType: answers.needType,
-      });
-
-      const county = zipCodeToCounty(answers.zipCode);
-      setSelectedCounty(county || undefined);
-
-      // Prioritize by urgency
-      const prioritized = prioritizeByUrgency(results, answers.urgency);
-      setSearchResults(prioritized);
-      setHasSearched(true);
-      setIsLoading(false);
-    }, 300);
-  };
-
-  const handleSearch = (params: SearchParams) => {
-    setIsLoading(true);
-
-    setTimeout(() => {
-      const results = findMatchingResources({
-        zipCode: params.zipCode,
-        needType: params.needType,
-        language: params.language !== "Any" ? params.language : undefined,
-      });
-
-      const county = zipCodeToCounty(params.zipCode);
-      setSelectedCounty(county || undefined);
-      setSearchResults(results);
-      setHasSearched(true);
-      setIsLoading(false);
-    }, 300);
-  };
-
-  const prioritizeByUrgency = (resources: LegalResource[], urgency: string): LegalResource[] => {
-    if (urgency === "emergency") {
-      // Put crisis resources first (24/7 or emergency services)
-      return resources.sort((a, b) => {
-        const aIs24_7 = a.hours?.includes("24/7") ? 0 : 1;
-        const bIs24_7 = b.hours?.includes("24/7") ? 0 : 1;
-        return aIs24_7 - bIs24_7;
-      });
-    }
-    return resources;
-  };
+    return matchesIssue && matchesCounty;
+  });
 
   return (
     <PageShell maxWidth="xl">
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-wider text-purple-soft">
+      <div className="space-y-10 py-8">
+        <section className="rounded-3xl bg-lavender/40 p-8 shadow-sm">
+          <p className="text-sm font-semibold uppercase tracking-wide text-purple-soft">
             Resources
           </p>
-          <h1 className="mt-1 text-3xl font-semibold text-ink sm:text-4xl">
+          <h1 className="mt-2 text-4xl font-bold text-ink">
             Legal Navigation
           </h1>
-          <p className="mt-2 max-w-xl text-ink-muted">
-            Find local legal services for your family. We're here to help with restraining orders, custody matters, court forms, and more.
+          <p className="mt-4 max-w-2xl text-lg text-ink-muted">
+            Find legal resources, organize exhibits, and get help preparing
+            legal forms. Nazaya Haven provides general information and resource
+            navigation, not legal advice.
           </p>
-        </div>
-      </div>
+        </section>
 
-     
-
-      {/* Support Wizard - Show first */}
-      {!wizardComplete && (
-        <div className="mb-8">
-          <SupportWizard onComplete={handleWizardComplete} />
-        </div>
-      )}
-
-      {/* If wizard complete - show results header */}
-      {wizardComplete && wizardAnswers && (
-        <div className="mb-8 rounded-lg border border-purple/20 bg-purple/5 p-4">
-          <p className="text-sm text-ink-muted">
-            Based on your needs:{" "}
-            <span className="font-semibold text-ink">
-              {needOptions.find((o) => o.value === wizardAnswers.needType)?.label}
-            </span>
-            {wizardAnswers.urgency === "emergency" && (
-              <span className="ml-2 inline-block rounded-full bg-pastel-rose/20 px-2 py-1 text-xs font-semibold text-pastel-rose">
-                🚨 URGENT
-              </span>
-            )}
-          </p>
-          <button
-            onClick={() => setWizardComplete(false)}
-            className="mt-2 text-sm text-purple hover:text-purple-deep"
-          >
-            ← Start over with different answers
-          </button>
-        </div>
-      )}
-
-      {/* Legal Disclaimer */}
-      {wizardComplete && (
-        <div className="mb-8 rounded-2xl border border-pastel-rose/30 bg-pastel-rose/5 p-6">
-          <p className="text-sm leading-relaxed text-ink-muted">
-            <strong className="text-ink">⚠️ Important Disclaimer:</strong> Nazaya Haven provides general information and resource navigation, not legal advice. Always consult with qualified attorneys for specific legal guidance, especially in matters involving domestic violence, custody, or family law.
-          </p>
-        </div>
-      )}
-
-      {/* Main Content Grid - Only show after wizard */}
-      {wizardComplete && (
-        <div className="grid gap-8 lg:grid-cols-3">
-        {/* Search Form - Sticky on larger screens */}
-        <div className="lg:col-span-1">
-          <div className="rounded-2xl border border-lavender-deep/40 bg-cream-dark/80 p-6 lg:sticky lg:top-6">
-            <h2 className="mb-4 text-lg font-semibold text-ink">Find Resources</h2>
-            <LegalSearch onSearch={handleSearch} isLoading={isLoading} />
+        <section className="grid gap-5 md:grid-cols-3">
+          <div className="rounded-2xl border border-purple/20 bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-ink">Find Legal Resources</h2>
+            <p className="mt-2 text-ink-muted">
+              Search by legal issue and ZIP code. Results stay on this same page.
+            </p>
           </div>
-        </div>
 
-        {/* Results - Takes up 2 columns */}
-        <div className="lg:col-span-2">
-          {hasSearched ? (
-            <LegalResources
-              resources={searchResults}
-              isLoading={isLoading}
-              selectedCounty={selectedCounty}
-            />
-          ) : (
-            <div className="rounded-2xl border border-lavender-deep/40 bg-lavender-light/40 p-8 text-center">
-              <h3 className="text-lg font-semibold text-ink">Start Your Search</h3>
-              <p className="mt-2 text-ink-muted">
-                Enter your ZIP code above to find legal resources in your area.
-              </p>
-              <p className="mt-4 text-sm text-ink-muted">
-                <strong>Tip:</strong> We have resources covering domestic violence, child abuse, custody, child support, immigration, housing, education rights, mental health, and victim compensation.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-      )}
-
-      {/* Understanding Help Categories - Reference Section */}
-      {wizardComplete && (
-        <>
-          <section className="mt-12 rounded-2xl border border-purple/20 bg-purple/5 p-8">
-            <h2 className="text-xl font-semibold text-ink">Understanding Your Legal Needs</h2>
+          <div className="rounded-2xl border border-purple/20 bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-ink">AI Exhibit Organizer</h2>
             <p className="mt-2 text-ink-muted">
-              We can help connect you with resources in these areas:
+              Organize evidence, documents, screenshots, photos, and records into exhibits.
             </p>
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-              {[
-                { emoji: "💜", title: "Domestic Violence", desc: "Restraining orders, safety planning" },
-                { emoji: "🤕", title: "Child Abuse", desc: "Reporting, advocacy, counseling" },
-                { emoji: "👨‍👩‍👧", title: "Custody & Visitation", desc: "Custody arrangements, modifications" },
-                { emoji: "💰", title: "Child Support", desc: "Support calculations, modifications" },
-                { emoji: "🌍", title: "Immigration", desc: "Family-related immigration support" },
-                { emoji: "🏠", title: "Housing", desc: "Legal aid for housing issues" },
-                { emoji: "📚", title: "Education Rights", desc: "Special education, school issues" },
-                { emoji: "💭", title: "Mental Health", desc: "Counseling & mental health support" },
-                { emoji: "🛡️", title: "Victim Compensation", desc: "Crime victim assistance programs" },
-              ].map((item) => (
-                <div key={item.title} className="rounded-lg bg-white/40 p-3">
-                  <p className="text-sm font-semibold text-ink">{item.emoji} {item.title}</p>
-                  <p className="text-xs text-ink-muted mt-1">{item.desc}</p>
-                </div>
-              ))}
-            </ul>
-          </section>
+            <button className="mt-4 rounded-full bg-purple px-5 py-2 font-semibold text-white">
+              Coming Soon
+            </button>
+          </div>
 
-          {/* DV Forms Guide - Static Reference Section */}
-          <section className="mt-8 rounded-2xl border border-lavender-deep/40 bg-lavender-light/40 p-8">
-            <h2 className="text-xl font-semibold text-ink">Domestic Violence Court Forms</h2>
+          <div className="rounded-2xl border border-purple/20 bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-ink">AI Legal Form Assistant</h2>
             <p className="mt-2 text-ink-muted">
-              If you're seeking a domestic violence restraining order, California courts use standard forms:
+              Answer plain-language questions and get help preparing court form drafts.
             </p>
-            <ul className="mt-4 space-y-3">
-              <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple/20 text-sm font-semibold text-purple">
-                  1
-                </span>
-                <div>
-                  <p className="font-medium text-ink">DV-100: Request for Domestic Violence Restraining Order</p>
-                  <p className="text-sm text-ink-muted">The initial petition form you file with the court.</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple/20 text-sm font-semibold text-purple">
-                  2
-                </span>
-                <div>
-                  <p className="font-medium text-ink">DV-109: Temporary Restraining Order</p>
-                  <p className="text-sm text-ink-muted">Emergency protection issued without a hearing (14-day protection).</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple/20 text-sm font-semibold text-purple">
-                  3
-                </span>
-                <div>
-                  <p className="font-medium text-ink">DV-110: Domestic Violence Restraining Order</p>
-                  <p className="text-sm text-ink-muted">Final order issued after a hearing (up to 5 years of protection).</p>
-                </div>
-              </li>
-            </ul>
+            <button className="mt-4 rounded-full bg-purple px-5 py-2 font-semibold text-white">
+              Coming Soon
+            </button>
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-purple/20 bg-white p-6 shadow-sm">
+          <h2 className="text-2xl font-bold text-ink">Find Legal Resources</h2>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <label className="block">
+              <span className="font-semibold text-ink">Legal issue</span>
+              <select
+                value={issue}
+                onChange={(event) => setIssue(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-purple/20 p-3"
+              >
+                {issueOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="block">
+              <span className="font-semibold text-ink">ZIP code</span>
+              <input
+                value={zip}
+                onChange={(event) => setZip(event.target.value)}
+                placeholder="Example: 94102"
+                maxLength={5}
+                className="mt-2 w-full rounded-xl border border-purple/20 p-3"
+              />
+            </label>
+          </div>
+
+          {county && (
             <p className="mt-4 text-sm text-ink-muted">
-              Visit <a href="https://www.courts.ca.gov/selfhelp.htm" target="_blank" rel="noopener noreferrer" className="font-medium text-purple hover:text-purple-deep">California Courts Self-Help Center</a> to download these forms with step-by-step instructions.
+              Showing resources near: <span className="font-semibold">{county}</span>
             </p>
-          </section>
-        </>
-      )}
+          )}
 
-      {/* Footer */}
-      <p className="mt-12 text-center">
-        <a href="/dashboard" className="text-sm text-ink-muted hover:text-purple">
-          ← Return to Dashboard
-        </a>
-      </p>
+          <div className="mt-6 space-y-4">
+            {filteredResources.map((resource) => (
+              <div
+                key={resource.name}
+                className="rounded-2xl border border-purple/10 bg-lavender/20 p-5"
+              >
+                <h3 className="text-xl font-bold text-ink">{resource.name}</h3>
+                <p className="mt-2 text-ink-muted">{resource.description}</p>
+                <p className="mt-3 text-sm text-ink-muted">
+                  County/Area: {resource.county}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <a
+                    href={`tel:${resource.phone}`}
+                    className="rounded-full bg-purple px-4 py-2 font-semibold text-white"
+                  >
+                    Call {resource.phone}
+                  </a>
+                  <a
+                    href={resource.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full border border-purple px-4 py-2 font-semibold text-purple"
+                  >
+                    Visit Website
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-2xl bg-cream p-5 text-sm text-ink-muted">
+          <strong>Important:</strong> Nazaya Haven gives general information and
+          resource navigation only. It is not a lawyer and does not provide legal
+          advice. For legal advice, contact a qualified attorney or legal aid
+          organization.
+        </section>
+      </div>
     </PageShell>
   );
 }
