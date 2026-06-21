@@ -6,11 +6,8 @@ import {
   type CommunityResourceCategory,
   type CommunityResourceResults,
 } from "@/data/community-resources";
+import { searchResources } from "@/lib/api-client";
 import { StatusPill } from "@/components/ui/StatusPill";
-import {
-  getDemoCommunityResourceResults,
-  resourceDemoModeNotice,
-} from "@/lib/resources/demo-resource-search";
 import { isStaticNazayaRuntime } from "@/lib/runtime/nazaya-runtime";
 
 const CATEGORIES: { id: CommunityResourceCategory; label: string }[] = [
@@ -30,6 +27,9 @@ const CATEGORY_LABELS: Record<CommunityResourceCategory | "national", string> = 
   national: "National Resources",
 };
 
+const DEMO_MODE_NOTICE =
+  "Demo mode: using built-in Bay Area sample resources while live search is unavailable on static GitHub Pages.";
+
 export function ResourceSearchPanel() {
   const [zip, setZip] = useState("");
   const [selected, setSelected] = useState<CommunityResourceCategory[]>([]);
@@ -43,11 +43,6 @@ export function ResourceSearchPanel() {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
     );
-  }
-
-  function showStaticPreviewResults() {
-    setFallbackNotice(resourceDemoModeNotice);
-    setResults(getDemoCommunityResourceResults({ zip, categories: selected }));
   }
 
   async function handleSearch(e: React.FormEvent) {
@@ -65,31 +60,18 @@ export function ResourceSearchPanel() {
       return;
     }
 
-    if (isDemoMode) {
-      showStaticPreviewResults();
-      return;
-    }
-
     setLoading(true);
     try {
-      const res = await fetch("/api/resources", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ zip, categories: selected }),
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        setError(
-          typeof data.error === "string"
-            ? data.error
-            : "Live resource search is unavailable."
-        );
-        return;
+      const data = await searchResources({ zip, categories: selected });
+      if (isDemoMode) {
+        setFallbackNotice(DEMO_MODE_NOTICE);
       }
-      setResults(data as CommunityResourceResults);
-    } catch {
-      setError("Live resource search is unavailable.");
+      setResults(data);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Resource search failed";
+      setError(errorMsg);
+      console.error("Resource search error:", err);
     } finally {
       setLoading(false);
     }

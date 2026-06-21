@@ -1,62 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import { getDemoNazayaChatResponse } from "@/lib/ai/demo-chat";
+import { sendChat, type ChatMessage } from "@/lib/api-client";
 import { nazayaQuickActions } from "@/lib/ai/quick-actions";
 import { isStaticNazayaRuntime } from "@/lib/runtime/nazaya-runtime";
-
-type Message = {
-  role: "user" | "assistant";
-  content: string;
-};
 
 export function NazayaChat() {
   const [draft, setDraft] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const isDemoMode = isStaticNazayaRuntime();
 
   const handleSend = async (text: string) => {
     if (!text.trim()) return;
 
-    const userMessage: Message = { role: "user", content: text };
-
-    if (isDemoMode) {
-      setMessages((prev) => [
-        ...prev,
-        userMessage,
-        {
-          role: "assistant",
-          content: getDemoNazayaChatResponse(text),
-        },
-      ]);
-      setDraft("");
-      return;
-    }
+    const userMessage: ChatMessage = { role: "user", content: text };
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-        }),
+      const response = await sendChat({
+        messages: [...messages, userMessage],
       });
 
-      if (!response.ok) {
-        throw new Error(
-          `API error: ${response.status} ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
       const assistantContent =
-        typeof data.content === "string"
-          ? data.content
+        typeof response.content === "string"
+          ? response.content
           : "Unexpected response format";
 
       setMessages((prev) => [

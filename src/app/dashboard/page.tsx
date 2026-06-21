@@ -22,12 +22,14 @@ const sections = [
     description:
       "See updates, stories, and encouragement from families and advocates in your circle.",
     icon: <IconFeed />,
+    href: "/community",
   },
   {
     title: "Support Groups",
     description:
       "Join moderated groups matched to your needs — parenting, education, wellness, and more.",
     icon: <IconGroups />,
+    href: "/groups",
   },
   {
     title: "Resources Near You",
@@ -55,6 +57,7 @@ const sections = [
     description:
       "Private reflections and milestones — a calm space to track your family's journey.",
     icon: <IconJournal />,
+    href: "/journal",
   },
   {
     title: "Nazaya AI",
