@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { BottomNav } from "@/components/BottomNav";
 
 const rawBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const basePath = rawBasePath === "/" ? "" : rawBasePath.replace(/\/$/, "");
@@ -38,7 +39,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <div className="pb-24 sm:pb-0">{children}</div>
+        <div className="sm:hidden">
+          <BottomNav />
+        </div>
+      </body>
     </html>
   );
 }
