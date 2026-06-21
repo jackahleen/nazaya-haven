@@ -51,6 +51,46 @@ test.describe("Dashboard card navigation", () => {
     }
   });
 
+  test("dashboard in-page cards jump to their sections", async ({ page }) => {
+    await page.goto("/dashboard/");
+
+    await page.getByRole("link", { name: "Nazaya AI" }).click();
+    await expect(page).toHaveURL(/\/dashboard\/?#nazaya-ai$/);
+    await expect(page.getByRole("heading", { name: "Nazaya AI" }).first()).toBeVisible();
+
+    await page.goto("/dashboard/");
+    await page.getByRole("link", { name: "Digital Parenting Guide" }).click();
+    await expect(page).toHaveURL(/\/dashboard\/?#digital-parenting$/);
+    await expect(
+      page.getByRole("heading", { name: "Digital Parenting Guide" }),
+    ).toBeVisible();
+  });
+
+  test("every dashboard card Open affordance belongs to a link", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard/");
+
+    const cards = [
+      "Community Feed",
+      "Support Groups",
+      "Resources Near You",
+      "Legal Navigation",
+      "Documents & Forms",
+      "Journal",
+      "Nazaya AI",
+      "Digital Parenting Guide",
+    ];
+
+    for (const title of cards) {
+      const card = page.getByRole("link", { name: title });
+      await expect(card).toBeVisible();
+      await expect(card.getByText("Open ->")).toBeVisible();
+    }
+
+    await expect(page.getByText("Coming soon")).toHaveCount(0);
+  });
+
   test("Account link is accessible from dashboard", async ({ page }) => {
     await page.goto("/dashboard/");
     const accountLink = page.getByRole("link", { name: "Account" });

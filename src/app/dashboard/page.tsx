@@ -65,12 +65,14 @@ const sections = [
     description:
       "Gentle, guided support for questions about advocacy, rights, and next steps — always with care.",
     icon: <IconAI />,
+    href: "#nazaya-ai",
   },
   {
     title: "Digital Parenting Guide",
     description:
       "Build adult tech literacy around internet access, privacy settings, screen-time routines, and guided navigation.",
     icon: <IconTeacher />,
+    href: "#digital-parenting",
   },
 ] as const;
 
@@ -112,8 +114,12 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <NazayaChat />
-      <DigitalParentingGuide />
+      <section id="nazaya-ai" className="scroll-mt-8">
+        <NazayaChat />
+      </section>
+      <section id="digital-parenting" className="scroll-mt-8">
+        <DigitalParentingGuide />
+      </section>
       <ChildCornerPreview />
       <IntegrationReadiness />
       <SessionMemoryPanel demoMode={true} />

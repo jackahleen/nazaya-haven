@@ -18,8 +18,14 @@ export function DashboardCard({ title, description, icon, href }: DashboardCardP
       <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-muted">
         {description}
       </p>
-      <span className="mt-4 text-sm font-medium text-purple group-hover:text-purple-deep">
-        Open →
+      <span
+        className={`mt-4 text-sm font-medium ${
+          href
+            ? "text-purple group-hover:text-purple-deep"
+            : "text-ink-muted"
+        }`}
+      >
+        {href ? "Open ->" : "Coming soon"}
       </span>
     </>
   );
