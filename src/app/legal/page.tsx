@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { BrandLogo } from "@/components/BrandLogo";
 import { BottomNav } from "@/components/BottomNav";
@@ -521,31 +521,196 @@ function ResourceFinder({ t }: { t: typeof T["en"] }) {
 
 // ─── Exhibit organizer ────────────────────────────────────────────────────────
 
-function ExhibitOrganizer({ t }: { t: typeof T["en"] }) {
-  const [entries, setEntries] = useState<ExhibitEntry[]>([{ id: 1, label: "", notes: "" }]);
-  const [saved, setSaved] = useState(false);
+type EvidenceItem = {
+  id: number;
+  label: string;
+  notes: string;
+  date: string;
+  category: string;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileType: string | null;
+};
 
-  const addEntry = () => setEntries(prev => [...prev, { id: Date.now(), label: "", notes: "" }]);
-  const update = (id: number, field: keyof ExhibitEntry, value: string) => setEntries(prev => prev.map(e => e.id === id ? { ...e, [field]: value } : e));
-  const remove = (id: number) => setEntries(prev => prev.filter(e => e.id !== id));
-  const handleSave = () => { setSaved(true); setTimeout(() => setSaved(false), 2500); };
+const EVIDENCE_CATEGORIES = ["Document", "Photo / Screenshot", "Text / Email", "Audio / Video", "Other"];
+
+function ExhibitOrganizer({ t }: { t: typeof T["en"] }) {
+  const [items, setItems] = useState<EvidenceItem[]>([]);
+  const [view, setView] = useState<"add" | "timeline">("add");
+  const [label, setLabel] = useState("");
+  const [notes, setNotes] = useState("");
+  const [date, setDate] = useState("");
+  const [category, setCategory] = useState("Document");
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileType, setFileType] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileName(file.name);
+    setFileType(file.type);
+    const url = URL.createObjectURL(file);
+    setFileUrl(url);
+    if (!label) setLabel(file.name.replace(/\.[^.]+$/, ""));
+  };
+
+  const addItem = () => {
+    if (!label.trim() && !fileUrl) return;
+    setItems(prev => [...prev, {
+      id: Date.now(),
+      label: label || fileName || "Untitled",
+      notes,
+      date: date || new Date().toISOString().slice(0, 10),
+      category,
+      fileUrl,
+      fileName,
+      fileType,
+    }]);
+    setLabel(""); setNotes(""); setDate(""); setCategory("Document");
+    setFileUrl(null); setFileName(null); setFileType(null);
+    if (fileRef.current) fileRef.current.value = "";
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const removeItem = (id: number) => setItems(prev => prev.filter(i => i.id !== id));
+
+  const sorted = [...items].sort((a, b) => b.date.localeCompare(a.date));
+
+  const isImage = (type: string | null) => type?.startsWith("image/") ?? false;
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-ink-muted">{t.exhibitsSubtitle}</p>
-      {entries.map((entry, i) => (
-        <div key={entry.id} className="rounded-2xl border border-lavender-deep/40 bg-cream-dark/60 p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-purple-soft">{t.exhibit} {i + 1}</span>
-            {entries.length > 1 && <button type="button" onClick={() => remove(entry.id)} className="text-xs text-ink-muted hover:text-purple">{t.remove}</button>}
+      <p className="text-sm text-ink-muted">Upload photos, screenshots, documents, and evidence. We organize everything into a timeline for you.</p>
+
+      {/* View toggle */}
+      <div className="flex gap-2">
+        <button onClick={() => setView("add")} className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${view === "add" ? "bg-purple text-cream" : "bg-lavender-light text-ink-muted hover:bg-lavender"}`}>+ Add Evidence</button>
+        <button onClick={() => setView("timeline")} className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${view === "timeline" ? "bg-purple text-cream" : "bg-lavender-light text-ink-muted hover:bg-lavender"}`}>
+          📅 Timeline {items.length > 0 && <span className="ml-1 rounded-full bg-purple-soft/30 px-1.5 text-xs">{items.length}</span>}
+        </button>
+      </div>
+
+      {/* Add form */}
+      {view === "add" && (
+        <div className="rounded-2xl border border-lavender-deep/40 bg-cream-dark/60 p-5 space-y-3">
+          {/* File upload drop zone */}
+          <div
+            onClick={() => fileRef.current?.click()}
+            className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-purple/30 bg-lavender-light/50 px-4 py-6 text-center transition hover:border-purple/60 hover:bg-lavender-light"
+          >
+            {fileUrl && isImage(fileType) ? (
+              <img src={fileUrl} alt={fileName ?? ""} className="max-h-40 rounded-xl object-contain shadow" />
+            ) : fileUrl ? (
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-3xl">📄</span>
+                <p className="text-sm font-medium text-ink">{fileName}</p>
+              </div>
+            ) : (
+              <>
+                <span className="text-4xl">📎</span>
+                <p className="text-sm font-semibold text-ink">Tap to upload a photo, screenshot, or file</p>
+                <p className="text-xs text-ink-muted">Images, PDFs, documents, audio, video</p>
+              </>
+            )}
           </div>
-          <input type="text" placeholder={t.docLabel} value={entry.label} onChange={e => update(entry.id, "label", e.target.value)} className="mb-2 w-full rounded-xl border border-lavender-deep/60 bg-cream px-3 py-2 text-sm text-ink placeholder:text-ink-muted/50 focus:border-purple focus:outline-none focus:ring-2 focus:ring-purple/20" />
-          <textarea rows={2} placeholder={t.docNotes} value={entry.notes} onChange={e => update(entry.id, "notes", e.target.value)} className="w-full resize-none rounded-xl border border-lavender-deep/60 bg-cream px-3 py-2 text-sm text-ink placeholder:text-ink-muted/50 focus:border-purple focus:outline-none focus:ring-2 focus:ring-purple/20" />
+          <input ref={fileRef} type="file" accept="image/*,application/pdf,.doc,.docx,.txt,audio/*,video/*" className="hidden" onChange={handleFile} />
+
+          <input
+            type="text"
+            placeholder="Label (e.g. CPS letter received, Text from school)"
+            value={label}
+            onChange={e => setLabel(e.target.value)}
+            className="w-full rounded-xl border border-lavender-deep/60 bg-cream px-3 py-2 text-sm text-ink placeholder:text-ink-muted/50 focus:border-purple focus:outline-none focus:ring-2 focus:ring-purple/20"
+          />
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-ink-muted">Date of incident/document</label>
+              <input
+                type="date"
+                value={date}
+                onChange={e => setDate(e.target.value)}
+                className="w-full rounded-xl border border-lavender-deep/60 bg-cream px-3 py-2 text-sm text-ink focus:border-purple focus:outline-none focus:ring-2 focus:ring-purple/20"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-ink-muted">Category</label>
+              <select value={category} onChange={e => setCategory(e.target.value)} className="w-full rounded-xl border border-lavender-deep/60 bg-cream px-3 py-2 text-sm text-ink focus:border-purple focus:outline-none focus:ring-2 focus:ring-purple/20">
+                {EVIDENCE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <textarea
+            rows={2}
+            placeholder="Notes: Who, what, where, when. What does this prove?"
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            className="w-full resize-none rounded-xl border border-lavender-deep/60 bg-cream px-3 py-2 text-sm text-ink placeholder:text-ink-muted/50 focus:border-purple focus:outline-none focus:ring-2 focus:ring-purple/20"
+          />
+
+          <button
+            type="button"
+            onClick={addItem}
+            disabled={!label.trim() && !fileUrl}
+            className="w-full rounded-full bg-purple py-2.5 text-sm font-semibold text-cream shadow-sm transition hover:bg-purple-deep disabled:opacity-40"
+          >
+            {saved ? "✓ Added to Timeline" : "Add to Evidence Timeline"}
+          </button>
         </div>
-      ))}
-      <div className="flex gap-3">
-        <button type="button" onClick={addEntry} className="rounded-full border border-purple/30 bg-lavender-light px-4 py-2 text-sm font-semibold text-purple-deep transition hover:bg-lavender">{t.addExhibit}</button>
-        <button type="button" onClick={handleSave} className="rounded-full bg-purple px-4 py-2 text-sm font-semibold text-cream shadow-sm transition hover:bg-purple-deep">{saved ? t.saved : t.saveList}</button>
+      )}
+
+      {/* Timeline view */}
+      {view === "timeline" && (
+        <div>
+          {sorted.length === 0 ? (
+            <div className="rounded-2xl border border-lavender-deep/30 bg-lavender-light/50 py-10 text-center">
+              <p className="text-3xl mb-2">📅</p>
+              <p className="text-sm text-ink-muted">No evidence added yet. Tap Add Evidence to get started.</p>
+            </div>
+          ) : (
+            <div className="relative space-y-0">
+              {/* Vertical line */}
+              <div className="absolute left-5 top-2 bottom-2 w-0.5 bg-lavender-deep/40" />
+              {sorted.map((item, i) => (
+                <div key={item.id} className="relative flex gap-4 pb-5">
+                  {/* Dot */}
+                  <div className="relative z-10 mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple text-sm font-bold text-cream shadow">
+                    {i + 1}
+                  </div>
+                  {/* Card */}
+                  <div className="flex-1 rounded-2xl border border-lavender-deep/30 bg-white/80 p-4 shadow-sm">
+                    <div className="mb-2 flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-bold text-ink">{item.label}</p>
+                        <div className="mt-1 flex flex-wrap gap-1.5">
+                          <span className="rounded-full bg-purple/10 px-2 py-0.5 text-xs font-medium text-purple-deep">{item.date}</span>
+                          <span className="rounded-full bg-lavender-light px-2 py-0.5 text-xs font-medium text-ink-muted">{item.category}</span>
+                        </div>
+                      </div>
+                      <button onClick={() => removeItem(item.id)} className="shrink-0 text-xs text-ink-muted hover:text-purple">✕</button>
+                    </div>
+                    {item.fileUrl && isImage(item.fileType) && (
+                      <img src={item.fileUrl} alt={item.fileName ?? ""} className="mb-2 max-h-32 rounded-xl object-contain" />
+                    )}
+                    {item.fileUrl && !isImage(item.fileType) && (
+                      <p className="mb-2 text-xs text-ink-muted">📄 {item.fileName}</p>
+                    )}
+                    {item.notes && <p className="text-sm text-ink-muted">{item.notes}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="rounded-xl border border-lavender-deep/20 bg-lavender-light/50 px-4 py-3 text-xs text-ink-muted">
+        <strong className="text-ink">Privacy:</strong> All files stay on your device and are never uploaded to any server. Clear your browser to remove them.
       </div>
     </div>
   );

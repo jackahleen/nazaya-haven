@@ -36,6 +36,7 @@ const CARDS = [
   { href: "/journal", emoji: "📖", label: "Journal", sub: "Track your journey", color: "bg-pastel-butter/70" },
   { href: "/ai", emoji: "🤖", label: "Nazaya AI", sub: "Your AI guide & support", color: "bg-lavender/70" },
   { href: "/support", emoji: "🌿", label: "Grounding & Support", sub: "Breathe & find calm", color: "bg-pastel-mint/70" },
+  { href: "/teacher", emoji: "🍎", label: "Teacher Mode", sub: "Calm & connect students", color: "bg-pastel-sky/70" },
 ];
 
 export default function DashboardPage() {

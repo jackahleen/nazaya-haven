@@ -92,8 +92,10 @@ function BoxBreathing() {
 
   useEffect(() => {
     if (!running) return;
-    let currentPhase = phase;
-    let currentCount = count;
+    let currentPhase = 0;
+    let currentCount = 4;
+    setPhase(0);
+    setCount(4);
 
     intervalRef.current = setInterval(() => {
       currentCount--;

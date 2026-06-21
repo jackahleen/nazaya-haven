@@ -4,7 +4,7 @@ export function HeroSearch() {
   return (
     <form
       role="search"
-      action="/dashboard"
+      action="/ai"
       method="get"
       className="mx-auto w-full max-w-2xl"
     >
@@ -29,7 +29,7 @@ export function HeroSearch() {
           type="submit"
           className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-purple px-5 py-2.5 text-sm font-semibold text-cream shadow-md shadow-purple/25 transition hover:bg-purple-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple focus-visible:ring-offset-2 focus-visible:ring-offset-cream sm:px-6 sm:py-3"
         >
-          Search
+          Nazaya AI
         </button>
       </div>
     </form>

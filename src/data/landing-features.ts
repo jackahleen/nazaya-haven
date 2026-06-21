@@ -36,7 +36,7 @@ export const landingFeatures: LandingFeature[] = [
       "Stories, updates, and encouragement from families and advocates in your circle.",
     Icon: IconFeed,
     accent: "lavender",
-    href: "/dashboard",
+    href: "/community",
   },
   {
     title: "Support Groups",
@@ -44,7 +44,7 @@ export const landingFeatures: LandingFeature[] = [
       "Moderated groups for parenting, education, wellness, and more — matched to your needs.",
     Icon: IconGroups,
     accent: "sky",
-    href: "/dashboard",
+    href: "/groups",
   },
   {
     title: "Jobs & Training",
@@ -52,7 +52,7 @@ export const landingFeatures: LandingFeature[] = [
       "Career pathways, skill-building workshops, and job listings tailored for caregivers.",
     Icon: IconBriefcase,
     accent: "mint",
-    href: "/dashboard",
+    href: "/jobs",
   },
   {
     title: "Legal Navigation",
@@ -60,7 +60,7 @@ export const landingFeatures: LandingFeature[] = [
       "Plain-language guides and referrals for rights, custody, education law, and advocacy.",
     Icon: IconLegal,
     accent: "peach",
-    href: "/dashboard",
+    href: "/legal",
   },
   {
     title: "Resources Near You",
@@ -68,7 +68,7 @@ export const landingFeatures: LandingFeature[] = [
       "Local clinics, legal aid, food banks, and community programs on an interactive map.",
     Icon: IconMap,
     accent: "butter",
-    href: "/dashboard",
+    href: "/resources",
   },
   {
     title: "Journal",
@@ -76,7 +76,7 @@ export const landingFeatures: LandingFeature[] = [
       "A private, calm space for reflections, milestones, and notes on your family’s journey.",
     Icon: IconJournal,
     accent: "rose",
-    href: "/dashboard",
+    href: "/journal",
   },
   {
     title: "Teacher Mode",
@@ -84,7 +84,7 @@ export const landingFeatures: LandingFeature[] = [
       "Classroom-friendly tools and resources for educators supporting students and families.",
     Icon: IconTeacher,
     accent: "lilac",
-    href: "/dashboard",
+    href: "/teacher",
   },
   {
     title: "Nazaya AI Assistant",
@@ -92,7 +92,7 @@ export const landingFeatures: LandingFeature[] = [
       "Gentle, guided answers about advocacy, next steps, and support — always with care.",
     Icon: IconAI,
     accent: "purple",
-    href: "/dashboard",
+    href: "/ai",
     featured: true,
   },
 ];

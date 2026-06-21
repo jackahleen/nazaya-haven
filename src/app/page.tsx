@@ -65,15 +65,8 @@ export default function HomePage() {
               </div>
 
               <div className="mt-10 flex w-full max-w-md flex-col gap-4 sm:max-w-none sm:flex-row sm:justify-center">
-                <Button href="/login" variant="primary" className="w-full sm:w-auto">
+                <Button href="/dashboard" variant="primary" className="w-full sm:w-auto">
                   Get Started
-                </Button>
-                <Button
-                  href="/dashboard"
-                  variant="secondary"
-                  className="w-full sm:w-auto"
-                >
-                  Explore Resources
                 </Button>
               </div>
 
@@ -156,7 +149,7 @@ export default function HomePage() {
               </p>
               <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Button
-                  href="/login"
+                  href="/dashboard"
                   variant="secondary"
                   className="w-full border-cream/40 bg-cream text-purple-deep hover:bg-cream-dark sm:w-auto"
                 >
