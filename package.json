@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.105.0",
+    "@octokit/rest": "^22.0.1"
+  }
+}
