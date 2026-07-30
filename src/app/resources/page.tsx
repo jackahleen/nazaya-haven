@@ -403,6 +403,7 @@ export default function ResourcesPage() {
   const [zip, setZip] = useState("");
   const [submittedZip, setSubmittedZip] = useState("");
   const [cityInfo, setCityInfo] = useState<CityInfo | null>(null);
+  const [visibleCount, setVisibleCount] = useState(5);
 
   // Load persisted ZIP from localStorage on mount
   useEffect(() => {
@@ -419,6 +420,7 @@ export default function ResourcesPage() {
     setSubmittedZip(value);
     const info = zipToCity(value);
     setCityInfo(info);
+    setVisibleCount(5);
     if (typeof window !== "undefined") localStorage.setItem("nazaya_zip", value);
   }
 
@@ -510,7 +512,7 @@ export default function ResourcesPage() {
 
         {/* Resource list */}
         <div className="space-y-3">
-          {filtered.map(r => (
+          {filtered.slice(0, visibleCount).map(r => (
             <div key={r.name} className={`rounded-2xl border border-white/60 ${r.color} p-4 shadow-sm`}>
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 text-2xl">{r.emoji}</span>
@@ -528,9 +530,14 @@ export default function ResourcesPage() {
           ))}
         </div>
 
-        <button className="mt-5 w-full rounded-2xl bg-purple py-3 text-sm font-semibold text-cream shadow-sm transition hover:bg-purple-deep">
-          View More Resources
-        </button>
+        {visibleCount < filtered.length && (
+          <button
+            onClick={() => setVisibleCount(c => c + 5)}
+            className="mt-5 w-full rounded-2xl bg-purple py-3 text-sm font-semibold text-cream shadow-sm transition hover:bg-purple-deep"
+          >
+            View More Resources ({filtered.length - visibleCount} remaining)
+          </button>
+        )}
 
         {/* Free Healthcare */}
         <div className="mt-8">
