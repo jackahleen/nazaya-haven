@@ -2,7 +2,6 @@ import Link from "next/link";
 import { BrandLogo } from "@/components/BrandLogo";
 
 const navLinks = [
-  { label: "Features", href: "#features" },
   { label: "Resources", href: "/dashboard" },
   { label: "Sign In", href: "/login" },
 ] as const;

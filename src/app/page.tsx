@@ -1,10 +1,8 @@
 import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/Button";
-import { FeatureCard } from "@/components/landing/FeatureCard";
 import { HeroSearch } from "@/components/landing/HeroSearch";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { LandingHeader } from "@/components/landing/LandingHeader";
-import { landingFeatures } from "@/data/landing-features";
 
 export default function HomePage() {
   return (
@@ -93,40 +91,6 @@ export default function HomePage() {
                 >
                   <p className="font-semibold text-ink">{item.label}</p>
                   <p className="mt-1 text-sm text-ink-muted">{item.detail}</p>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* Feature cards */}
-          <section
-            id="features"
-            aria-labelledby="features-heading"
-            className="mx-auto max-w-6xl px-5 py-16 sm:px-6 sm:py-20"
-          >
-            <div className="mb-10 text-center sm:mb-12">
-              <p className="text-sm font-semibold uppercase tracking-wider text-purple-soft">
-                Your haven hub
-              </p>
-              <h2
-                id="features-heading"
-                className="mt-2 text-2xl font-semibold text-ink sm:text-3xl"
-              >
-                Everything you need, in one welcoming place
-              </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-ink-muted">
-                Explore tools built for safety, strength, and togetherness —
-                from community feeds to your Nazaya AI Assistant.
-              </p>
-            </div>
-
-            <ul className="grid list-none gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {landingFeatures.map((feature) => (
-                <li
-                  key={feature.title}
-                  className={feature.featured ? "sm:col-span-2 lg:col-span-1" : ""}
-                >
-                  <FeatureCard feature={feature} />
                 </li>
               ))}
             </ul>
